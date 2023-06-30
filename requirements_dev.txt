@@ -1,0 +1,28 @@
+pip
+wheel
+
+twine==1.14.0
+pytest
+pytest-runner
+pytest-cov
+pytest-cookies
+nbmake
+flake8
+coverage
+flake8-html
+nbsphinx==0.8.6
+nbsphinx-link
+sphinx>=3 # jupyter_sphinx requires sphinx>=2
+jupyter_sphinx>=0.3.2
+pygments>=2.6.1
+pydata-sphinx-theme
+numpydoc
+
+pre-commit
+black>=23.1.0
+isort>=5.10.1
+codespell
+
+numpy>=1.21
+matplotlib >= 3.5.1
+typing_extensions
