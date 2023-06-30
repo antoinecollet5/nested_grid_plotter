@@ -102,9 +102,3 @@ jobs:
         with:
           name: dist
           path: dist/*.whl
-
-  deploy:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-      # Add deployment steps here as needed
