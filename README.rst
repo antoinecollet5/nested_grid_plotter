@@ -11,8 +11,8 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 .. |License| image:: https://img.shields.io/badge/License-MIT license-blue.svg
     :target: https://github.com/antoinecollet5/nested_grid_plotter/-/blob/master/LICENSE
 
-.. |Stars| image:: https://img.shields.io/badge/dynamic/json?color=green&label=gitlab%20stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F31672379
-    :target: https://img.shields.io/badge/dynamic/json?color=green&label=gitlab%20stars&query=%24.star_count&url=https%3A%2F%2Fgitlab.com%2Fapi%2Fv4%2Fprojects%2F31672379`
+.. |Stars| image:: https://img.shields.io/github/stars/antoinecollet5/nested_grid_plotter.svg?style=social&label=Star&maxAge=2592000
+    :target: https://github.com/antoinecollet5/nested_grid_plotter/stargazers
     :alt: Stars
 
 .. |Python| image:: https://img.shields.io/pypi/pyversions/nested-grid-plotter.svg
