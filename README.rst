@@ -50,3 +50,8 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 .. |Isort| image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat
     :target: https://timothycrosley.github.io/isort
     :alt: isort
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/68aa4e7c36e445f498e98d4f152d9e42
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/gh/antoinecollet5/nested_grid_plotter?utm_source=github.com&utm_medium=referral&utm_content=antoinecollet5/nested_grid_plotter&utm_campaign=Badge_Grade
