@@ -10,13 +10,17 @@ nbmake
 flake8
 coverage
 flake8-html
+
+# doc
 nbsphinx==0.8.6
 nbsphinx-link
 sphinx>=3 # jupyter_sphinx requires sphinx>=2
 jupyter_sphinx>=0.3.2
+sphinxcontrib-plantuml
 pygments>=2.6.1
 pydata-sphinx-theme
 numpydoc
+jinja2==3.0.3
 
 pre-commit
 black>=23.1.0
