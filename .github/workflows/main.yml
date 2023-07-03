@@ -2,8 +2,9 @@ name: CI
 
 on:
   push:
+    # on every branch
     branches:
-      - main
+      - '*'
 
 env:
   PIP_CACHE_DIR: ${{ github.workspace }}/.cache/pip
