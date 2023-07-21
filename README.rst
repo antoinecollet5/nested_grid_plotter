@@ -27,16 +27,16 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
     :target: https://pepy.tech/project/nested-grid-plotter
     :alt: Downoads
 
-.. |Build Status| image:: https://github.com/antoinecollet5/nested_grid_plotter/badges/master/pipeline.svg
-    :target: https://github.com/antoinecollet5/nested_grid_plotter/pipelines/
-    :alt: Build Status
+.. |Build Status| image:: https://github.com/antoinecollet5/nested_grid_plotter/actions/workflows/main.yml/badge.svg
+    :target: https://github.com/antoinecollet5/nested_grid_plotter/actions/workflows/main.yml
+    :alt: Build Status  
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/nested-grid-plotter/badge/?version=latest
     :target: https://nested-grid-plotter.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |Coverage| image:: https://github.com/antoinecollet5/nested_grid_plotter/badges/master/coverage.svg
-    :target: https://github.com/antoinecollet5/nested_grid_plotter/pipelines/
+.. |Coverage| image:: https://codecov.io/gh/antoinecollet5/nested_grid_plotter/branch/master/graph/badge.svg?token=ISE874MMOF
+    :target: https://codecov.io/gh/antoinecollet5/nested_grid_plotter
     :alt: Coverage
 
 .. |Codacy| image:: https://app.codacy.com/project/badge/Grade/f4991359b8e84a44bbadf4f1a70bfa21
