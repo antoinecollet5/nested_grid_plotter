@@ -35,8 +35,8 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
     :target: https://nested-grid-plotter.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |Coverage| image:: https://github.com/antoinecollet5/nested_grid_plotter/badges/master/coverage.svg
-    :target: https://github.com/antoinecollet5/nested_grid_plotter/actions/workflows/main.yml
+.. |Coverage| image:: https://codecov.io/gh/antoinecollet5/nested_grid_plotter/branch/master/graph/badge.svg?token=ISE874MMOF
+    :target: https://codecov.io/gh/antoinecollet5/nested_grid_plotter
     :alt: Coverage
 
 .. |Codacy| image:: https://app.codacy.com/project/badge/Grade/f4991359b8e84a44bbadf4f1a70bfa21
