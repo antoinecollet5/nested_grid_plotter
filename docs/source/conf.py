@@ -66,8 +66,12 @@ extensions = [
     "sphinx.ext.autosectionlabel",  # Allow reference sections using its title
     # 'sphinx.ext.mathjax',
     "nbsphinx",  # provides a source parser for *.ipynb files.
-    "nbsphinx_link",  # allows you to include Jupyter notebooks that sit outside your sphinx source directory in your documentation.
-    "jupyter_sphinx",  # enables running code embedded in Sphinx documentation and embedding output of that code into the resulting document
+    # allows you to include Jupyter notebooks that sit outside your sphinx source
+    # directory in your documentation.
+    "nbsphinx_link",
+    # enables running code embedded in Sphinx documentation and embedding
+    # output of that code into the resulting document
+    "jupyter_sphinx",
 ]
 
 # -----------------------------------------------------------------------------
@@ -83,7 +87,8 @@ autodoc_member_order = "groupwise"
 # autodoc_member_order = 'bysource'
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
-# numpydoc_show_class_members=False  # This is because numpydoc screew up with autosummary
+# This is because numpydoc screew up with autosummary
+# numpydoc_show_class_members=False
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -204,7 +209,10 @@ html_theme_options = {
         },
         {
             "name": "Contributing",
-            "url": "https://github.com/antoinecollet5/nested_grid_plotter/CONTRIBUTING.rst",
+            "url": (
+                "https://github.com/antoinecollet5/"
+                "nested_grid_plotter/CONTRIBUTING.rst"
+            ),
             "icon": "fa fa-gavel fa-fw",
         },
         # {
