@@ -2,7 +2,7 @@
 About Nested Grid Plotter
 =========================
 
-|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Code style: black| |Isort|
+|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: black| |Isort|
 
 NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intends to simplify the plotting of nestedgrid by providing a objected oriented class.
 
@@ -29,7 +29,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 
 .. |Build Status| image:: https://github.com/antoinecollet5/nested_grid_plotter/actions/workflows/main.yml/badge.svg
     :target: https://github.com/antoinecollet5/nested_grid_plotter/actions/workflows/main.yml
-    :alt: Build Status  
+    :alt: Build Status
 
 .. |Documentation Status| image:: https://readthedocs.org/projects/nested-grid-plotter/badge/?version=latest
     :target: https://nested-grid-plotter.readthedocs.io/en/latest/?badge=latest
@@ -42,7 +42,10 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 .. |Codacy| image:: https://app.codacy.com/project/badge/Grade/f4991359b8e84a44bbadf4f1a70bfa21
     :target: https://app.codacy.com/gh/antoinecollet5/nested_grid_plotter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
     :alt: codacy
-    
+
+.. |Precommit: enabled| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
+   :target: https://github.com/pre-commit/pre-commit
+
 .. |Code style: black| image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
     :target: https://github.com/psf/black
     :alt: Black

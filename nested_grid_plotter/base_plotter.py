@@ -162,8 +162,9 @@ class NestedGridPlotter:
         Parameters
         ----------
         subfigs : Union[Figure, np.ArrayLike[Figure]]
-            Available subfigures. It is a :class:`matplotlib.figure.Figure` if there is only one row
-            and one column, otherwise, a numpy array of :class:`matplotlib.figure.Figure`.
+            Available subfigures. It is a :class:`matplotlib.figure.Figure` if there
+            is only one row and one column, otherwise, a numpy array of
+            :class:`matplotlib.figure.Figure`.
         nrows: int
             Number of rows for subfigures.
         ncols : int

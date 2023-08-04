@@ -121,7 +121,10 @@ def test_animated_multi_plot(tmp_folder) -> None:
     # y must be provided
     with pytest.raises(
         ValueError,
-        match=r"Error with data arguments: for key \"y_animated2 \(blue\)\" y must be given!",
+        match=(
+            r"Error with data arguments: for key \"y_animated2 \(blue\)\" "
+            r"y must be given!"
+        ),
     ):
         plotter.animated_multi_plot(
             ax_name="ax12",
