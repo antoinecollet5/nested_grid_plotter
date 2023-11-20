@@ -26,7 +26,7 @@ jinja2==3.0.3
 pre-commit
 black>=23.1.0
 isort>=5.10.1
-codespell
+codespell==2.2.6
 
 numpy>=1.21
 matplotlib >= 3.5.1
