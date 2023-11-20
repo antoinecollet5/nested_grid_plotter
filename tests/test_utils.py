@@ -19,21 +19,7 @@ import pytest
 from matplotlib.animation import HTMLWriter
 from matplotlib.axes import Axes  # Just for liting
 
-from nested_grid_plotter import NestedGridPlotter
-from nested_grid_plotter.utils import (
-    add_grid_and_tick_prams_to_axis,
-    add_xaxis_twin_as_date,
-    align_y_axes,
-    align_y_axes_on_values,
-    extract_frames_from_embedded_html_animation,
-    get_line_style,
-    hide_axis_spine,
-    hide_axis_ticklabels,
-    make_patch_spines_invisible,
-    make_ticks_overlapping_axis_frame_invisible,
-    make_y_axes_symmetric_zero_centered,
-    replace_bad_path_characters,
-)
+import nested_grid_plotter as ngp
 
 
 @pytest.fixture
@@ -43,7 +29,7 @@ def tmp_folder(tmp_path_factory):
 
 
 def test_get_line_style() -> None:
-    get_line_style("solid")
+    ngp.get_line_style("solid")
 
 
 def create_animation() -> animation:
@@ -70,7 +56,7 @@ def test_extract_frames(frame_format, tmp_folder) -> None:
 
     # With a given path
     target_path = tmp_folder.joinpath("exported_figures")
-    extract_frames_from_embedded_html_animation(
+    ngp.extract_frames_from_embedded_html_animation(
         fname,
         target_path=target_path,
     )
@@ -78,7 +64,7 @@ def test_extract_frames(frame_format, tmp_folder) -> None:
     assert len(list((target_path.glob(f"**/*.{frame_format}")))) == 20
 
     # With no path
-    extract_frames_from_embedded_html_animation(
+    ngp.extract_frames_from_embedded_html_animation(
         fname,
         # target_path=target_path,
     )
@@ -88,10 +74,10 @@ def test_extract_frames(frame_format, tmp_folder) -> None:
 
 
 def test_make_patch_spines_invisible():
-    plotter = NestedGridPlotter()
+    plotter = ngp.NestedGridPlotter()
     ax = plotter.ax_dict["ax1-1"]
-    add_grid_and_tick_prams_to_axis(ax)
-    make_patch_spines_invisible(ax)
+    ngp.add_grid_and_tick_prams_to_axis(ax)
+    ngp.make_patch_spines_invisible(ax)
 
 
 def badfname():
@@ -107,11 +93,11 @@ def badfname():
     ],
 )
 def test_replace_bad_path_characters(test_input, repchar, expected):
-    assert replace_bad_path_characters(test_input, repchar) == expected
+    assert ngp.replace_bad_path_characters(test_input, repchar) == expected
 
 
-def gen_complex_example_fig() -> NestedGridPlotter:
-    return NestedGridPlotter(
+def gen_complex_example_fig() -> ngp.NestedGridPlotter:
+    return ngp.NestedGridPlotter(
         fig_params={
             "constrained_layout": True,  # Always use this to prevent overlappings
             "figsize": (15, 10),
@@ -142,8 +128,8 @@ def test_add_grid_to_specific_axes_of_the_plot():
         assert not ax.yaxis.get_major_ticks()[0].gridline.get_visible()
 
     # Add a grid to specific axes
-    add_grid_and_tick_prams_to_axis(plotter.ax_dict["lt1"])
-    add_grid_and_tick_prams_to_axis(
+    ngp.add_grid_and_tick_prams_to_axis(plotter.ax_dict["lt1"])
+    ngp.add_grid_and_tick_prams_to_axis(
         plotter.ax_dict["lb1"], colors="red", grid_color="red"
     )
 
@@ -164,8 +150,8 @@ def test_make_ticks_overlapping_axis_frame_invisible():
     ax_name = "lt1"
     ax = plotter.ax_dict[ax_name]
     # Add a grid to a specific ax
-    add_grid_and_tick_prams_to_axis(ax)
-    make_ticks_overlapping_axis_frame_invisible(ax)
+    ngp.add_grid_and_tick_prams_to_axis(ax)
+    ngp.make_ticks_overlapping_axis_frame_invisible(ax)
 
     # Test that the ticks have been hidden correctly
     # For the x axis
@@ -198,15 +184,15 @@ def test_hide_axis_ticklabels():
     ax = plotter.ax_dict["l2"]
     assert len(ax.get_xticklabels()) != 0
     assert len(ax.get_yticklabels()) != 0
-    hide_axis_ticklabels(ax, "x")
-    hide_axis_ticklabels(ax, "y")
+    ngp.hide_axis_ticklabels(ax, "x")
+    ngp.hide_axis_ticklabels(ax, "y")
     assert len(ax.get_xticklabels()) == 0
     assert len(ax.get_yticklabels()) == 0
 
     ax = plotter.ax_dict["rt2"]
     assert len(ax.get_xticklabels()) != 0
     assert len(ax.get_yticklabels()) != 0
-    hide_axis_ticklabels(ax, "both")
+    ngp.hide_axis_ticklabels(ax, "both")
     assert len(ax.get_xticklabels()) == 0
     assert len(ax.get_yticklabels()) == 0
 
@@ -217,14 +203,14 @@ def test_hide_axis_spines():
     ax = plotter.ax_dict["bt2"]
 
     # Remove the spines in plot 'bt2'
-    hide_axis_spine(ax, loc="top")
-    hide_axis_spine(ax, loc="right")
-    hide_axis_spine(ax, loc="left")
-    hide_axis_spine(ax, loc="bottom")
+    ngp.hide_axis_spine(ax, loc="top")
+    ngp.hide_axis_spine(ax, loc="right")
+    ngp.hide_axis_spine(ax, loc="left")
+    ngp.hide_axis_spine(ax, loc="bottom")
 
     # Create a plot
     plotter = gen_complex_example_fig()
-    hide_axis_spine(plotter.ax_dict["bt2"], loc="all")
+    ngp.hide_axis_spine(plotter.ax_dict["bt2"], loc="all")
 
 
 # Create a function to plot the data on one axis
@@ -250,6 +236,87 @@ def plotLines(
     return [ax, tax1, tax2]
 
 
+# Create a function to plot the data on one axis
+def plotLines2(
+    x1: np.ndarray, x2: np.ndarray, x3: np.ndarray, y: np.ndarray, ax: Axes
+) -> List[Axes]:
+    ax.plot(x1, y, "b-")
+    ax.tick_params("y", colors="b")
+
+    tax1 = ax.twiny()
+    tax1.plot(x2, y, "r-")
+    tax1.tick_params("y", colors="r")
+
+    tax2 = ax.twiny()
+    tax2.spines["right"].set_position(("axes", 1.2))
+    # make_patch_spines_invisible(tax2)
+    tax2.spines["right"].set_visible(True)
+    tax2.plot(x3, y, "g-")
+    tax2.tick_params("y", colors="g")
+
+    ax.grid(True, axis="both")
+
+    return [ax, tax1, tax2]
+
+
+def test_align_x_axes():
+    # craft some data to plot
+    y = np.arange(20)
+    x1 = np.sin(y)
+    x2 = y / 1000 + np.exp(y)
+    x3 = y + y**2 / 3.14
+
+    plt.rcParams.update({"font.size": 10})
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (14, 6)},
+        subfigs_params={"ncols": 3},
+    )
+
+    # Left plot: No alignment.
+    ax1 = plotter.ax_dict["ax1-1"]
+    axes1 = plotLines2(x1, x2, x3, y, ax1)
+    ax1.set_title("No alignment")
+
+    assert axes1[0].get_xticks().size != axes1[1].get_xticks().size
+
+    # Mid plot: Aligned at (approximately) the lower bound of each y axis.
+    ax2 = plotter.ax_dict["ax1-2"]
+    axes2 = plotLines2(x1, x2, x3, y, ax2)
+    ngp.align_x_axes(axes2)
+    ax2.set_title("Default alignment")
+
+    assert (
+        axes2[0].get_xticks().size
+        == axes2[1].get_xticks().size
+        == axes2[2].get_xticks().size
+    )
+
+    # Right plot: Aligned at specified values: 0 for blue, 2.2*1e8 for red, and 44 for
+    # green. Those are chosen arbitrarily for the example.
+    ax3 = plotter.ax_dict["ax1-3"]
+    axes3 = plotLines2(x1, x2, x3, y, ax3)
+
+    # test the case with no arguments:
+    ngp.align_x_axes_on_values(
+        axes3
+    )  # This is not the bast behavior ever, but it should pass
+    # test the case when incorrect number of values is given
+    with pytest.raises(ValueError):
+        ngp.align_x_axes_on_values(axes3, [0, 2.2 * 1e8])
+
+    ngp.align_x_axes_on_values(axes3, [0, 2.2 * 1e8, 44])
+    ax3.set_title("Specified alignment")
+
+    assert (
+        axes3[0].get_xticks().size
+        == axes3[1].get_xticks().size
+        == axes3[2].get_xticks().size
+    )
+    pos = int(np.where(axes3[0].get_xticks() == 0.0)[0][0])
+    assert (axes3[1].get_xticks()[pos] - 22 * 1e8) < 0.00001
+    assert axes3[2].get_xticks()[pos] == 44.0
+
+
 def test_align_y_axes():
     # craft some data to plot
     x = np.arange(20)
@@ -258,7 +325,7 @@ def test_align_y_axes():
     y3 = x + x**2 / 3.14
 
     plt.rcParams.update({"font.size": 10})
-    plotter = NestedGridPlotter(
+    plotter = ngp.NestedGridPlotter(
         fig_params={"constrained_layout": True, "figsize": (14, 6)},
         subfigs_params={"ncols": 3},
     )
@@ -273,7 +340,7 @@ def test_align_y_axes():
     # Mid plot: Aligned at (approximately) the lower bound of each y axis.
     ax2 = plotter.ax_dict["ax1-2"]
     axes2 = plotLines(x, y1, y2, y3, ax2)
-    align_y_axes(axes2)
+    ngp.align_y_axes(axes2)
     ax2.set_title("Default alignment")
 
     assert (
@@ -287,14 +354,14 @@ def test_align_y_axes():
     ax3 = plotter.ax_dict["ax1-3"]
     axes3 = plotLines(x, y1, y2, y3, ax3)
     # test the case with no arguments:
-    align_y_axes_on_values(
+    ngp.align_y_axes_on_values(
         axes3
     )  # This is not the bast behavior ever, but it should pass
     # test the case when incorrect number of values is given
     with pytest.raises(ValueError):
-        align_y_axes_on_values(axes3, [0, 2.2 * 1e8])
+        ngp.align_y_axes_on_values(axes3, [0, 2.2 * 1e8])
 
-    align_y_axes_on_values(axes3, [0, 2.2 * 1e8, 44])
+    ngp.align_y_axes_on_values(axes3, [0, 2.2 * 1e8, 44])
     ax3.set_title("Specified alignment")
 
     assert (
@@ -307,8 +374,57 @@ def test_align_y_axes():
     assert axes3[2].get_yticks()[pos] == 44.0
 
 
+def test_make_x_axes_symmetric_zero_centered():
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (15, 5)},
+        subfigs_params={"ncols": 3},
+    )
+
+    # Make some data
+    np.random.seed(1)
+    # data1 = np.random.normal(0,1,20)
+    x_data1 = np.random.rand(20) - 3
+    x_data2 = np.random.rand(20)
+    y_data = np.arange(x_data1.size)
+    xy = np.zeros(20)
+
+    ax1 = plotter.ax_dict["ax1-1"]
+    ax1_twin = ax1.twiny()
+    ax1.plot(x_data1, y_data, label="data1")
+    ax1_twin.plot(x_data2, y_data, c="r", label="data2")
+    ax1.set_title("No alignment")
+
+    assert ax1.get_xlim()[0] != -ax1.get_xlim()[1]
+    assert ax1_twin.get_xlim()[0] != -ax1_twin.get_xlim()[1]
+
+    ax2 = plotter.ax_dict["ax1-2"]
+    ax2_twin = ax2.twiny()
+    ax2.plot(x_data1, y_data, label="data1")
+    ax2.plot(xy, y_data, linestyle="--")
+    ax2_twin.plot(x_data2, y_data, c="r", label="data2")
+    ngp.align_x_axes_on_values(
+        [ax2, ax2_twin], [0.0, 0.0]
+    )  # Works for more than 2 axes
+    ax2.set_title("Specific alignment at y=0.0, no symmetry")
+
+    ax3 = plotter.ax_dict["ax1-3"]
+    ax3_twin = ax3.twinx()
+    ax3.plot(x_data1, y_data, label="data1")
+    ax3.plot(xy, y_data, linestyle="--")
+    ax3_twin.plot(x_data2, y_data, c="r", label="data2")
+    ngp.make_x_axes_symmetric_zero_centered(
+        [ax3, ax3_twin]
+    )  # Works for more than 2 axes
+    ax3.set_title("Specific alignment at y=0.0, with symmetry")
+
+    assert ax3.get_xlim()[0] == -ax3.get_xlim()[1]
+    assert ax3_twin.get_xlim()[0] == -ax3_twin.get_xlim()[1]
+
+    plotter.add_fig_legend(fontsize=10, ncol=2)
+
+
 def test_make_y_axes_symmetric_zero_centered():
-    plotter = NestedGridPlotter(
+    plotter = ngp.NestedGridPlotter(
         fig_params={"constrained_layout": True, "figsize": (15, 5)},
         subfigs_params={"ncols": 3},
     )
@@ -334,7 +450,9 @@ def test_make_y_axes_symmetric_zero_centered():
     ax2.plot(data1, label="data1")
     ax2.plot(xy, linestyle="--")
     ax2_twin.plot(data2, c="r", label="data2")
-    align_y_axes_on_values([ax2, ax2_twin], [0.0, 0.0])  # Works for more than 2 axes
+    ngp.align_y_axes_on_values(
+        [ax2, ax2_twin], [0.0, 0.0]
+    )  # Works for more than 2 axes
     ax2.set_title("Specific alignment at y=0.0, no symmetry")
 
     ax3 = plotter.ax_dict["ax1-3"]
@@ -342,7 +460,9 @@ def test_make_y_axes_symmetric_zero_centered():
     ax3.plot(data1, label="data1")
     ax3.plot(xy, linestyle="--")
     ax3_twin.plot(data2, c="r", label="data2")
-    make_y_axes_symmetric_zero_centered([ax3, ax3_twin])  # Works for more than 2 axes
+    ngp.make_y_axes_symmetric_zero_centered(
+        [ax3, ax3_twin]
+    )  # Works for more than 2 axes
     ax3.set_title("Specific alignment at y=0.0, with symmetry")
 
     assert ax3.get_ylim()[0] == -ax3.get_ylim()[1]
@@ -352,7 +472,7 @@ def test_make_y_axes_symmetric_zero_centered():
 
 
 def test_add_xaxis_twin_as_date() -> None:
-    plotter: NestedGridPlotter = NestedGridPlotter(
+    plotter: ngp.NestedGridPlotter = ngp.NestedGridPlotter(
         fig_params={"constrained_layout": True, "figsize": (15, 5)},
         subfigs_params={"ncols": 3},
     )
@@ -364,7 +484,7 @@ def test_add_xaxis_twin_as_date() -> None:
     ax1.set_xlabel("Number of days")
 
     # Add a date x axis
-    add_xaxis_twin_as_date(
+    ngp.add_xaxis_twin_as_date(
         ax1,
         first_date=datetime(2022, 1, 6),
         time_units="days",
@@ -373,7 +493,7 @@ def test_add_xaxis_twin_as_date() -> None:
     )
 
     # Add a date x axis
-    add_xaxis_twin_as_date(
+    ngp.add_xaxis_twin_as_date(
         ax1,
         first_date=datetime(2022, 1, 6),
         time_units="days",
@@ -388,7 +508,7 @@ def test_add_xaxis_twin_as_date() -> None:
     ax2.set_xlabel("Number of months")
 
     # Add a date x axis
-    add_xaxis_twin_as_date(
+    ngp.add_xaxis_twin_as_date(
         ax2,
         first_date=datetime(2022, 1, 6),
         time_units="months",
@@ -403,7 +523,7 @@ def test_add_xaxis_twin_as_date() -> None:
     ax3.set_xlabel("Number of years")
 
     # Add a date x axis
-    ax3 = add_xaxis_twin_as_date(
+    ax3 = ngp.add_xaxis_twin_as_date(
         ax3,
         first_date=datetime(2022, 1, 6),
         time_units="years",
@@ -418,7 +538,7 @@ def test_add_xaxis_twin_as_date() -> None:
             "time_units should be in ['days', 'd', 'months', 'm', 'years', 'y']"
         ),
     ):
-        ax3 = add_xaxis_twin_as_date(
+        ax3 = ngp.add_xaxis_twin_as_date(
             ax3,
             first_date=datetime(2022, 1, 6),
             time_units="jours",

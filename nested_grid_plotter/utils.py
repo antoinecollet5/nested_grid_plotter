@@ -334,6 +334,27 @@ def hide_axis_spine(
         ax.spines[loc].set_visible(False)
 
 
+def align_x_axes(axes: List[Axes], is_ticks_major: bool = True) -> List[Any]:
+    """
+    Align the ticks of multiple x axes.
+
+    A new sets of ticks are computed for each axis in <axes> but with equal
+    length.
+
+    Parameters
+    ----------
+    axes : List[Axes]
+        List of axes objects whose yaxis ticks are to be aligned.
+    is_ticks_major: bool, optional
+        Whether to consider only major ticks. The default is True.
+
+    Returns
+    -------
+        new_ticks (list): a list of new ticks for each axis in <axes>.
+    """
+    return _align_axes(axes, is_ticks_major, False)
+
+
 def align_y_axes(axes: List[Axes], is_ticks_major: bool = True) -> List[Any]:
     """
     Align the ticks of multiple y axes.
@@ -345,13 +366,45 @@ def align_y_axes(axes: List[Axes], is_ticks_major: bool = True) -> List[Any]:
     ----------
     axes : List[Axes]
         List of axes objects whose yaxis ticks are to be aligned.
+    is_ticks_major: bool, optional
+        Whether to consider only major ticks. The default is True.
+
+    Returns
+    -------
+        new_ticks (list): a list of new ticks for each axis in <axes>.
+    """
+    return _align_axes(axes, is_ticks_major, True)
+
+
+def _align_axes(
+    axes: List[Axes], is_ticks_major: bool = True, is_y_axis: bool = True
+) -> List[Any]:
+    """
+    Align the ticks of multiple y axes.
+
+    A new sets of ticks are computed for each axis in <axes> but with equal
+    length.
+
+    Parameters
+    ----------
+    axes : List[Axes]
+        List of axes objects whose yaxis ticks are to be aligned.
+    is_ticks_major: bool, optional
+        Whether to consider only major ticks. The default is True.
+    is_y_axis:
+        Whether to perform the alignment on the y-axis. If False, perform it on the
+        x axis. The default is True.
 
     Returns
     -------
         new_ticks (list): a list of new ticks for each axis in <axes>.
     """
     n_ax = len(axes)
-    ticks = [aii.get_yticks(minor=not is_ticks_major) for aii in axes]
+    if is_y_axis:
+        ticks = [aii.get_yticks(minor=not is_ticks_major) for aii in axes]
+    else:
+        ticks = [aii.get_xticks(minor=not is_ticks_major) for aii in axes]
+
     max_nbins = max([len(tick) for tick in ticks])
 
     # Get upper and lower bounds of each axis
@@ -385,9 +438,45 @@ def align_y_axes(axes: List[Axes], is_ticks_major: bool = True) -> List[Any]:
 
     # set ticks for each axis
     for axii, tii in zip(axes, new_ticks):
-        axii.set_yticks(tii)
+        if is_y_axis:
+            axii.set_yticks(tii)
+        else:
+            axii.set_xticks(tii)
 
     return new_ticks
+
+
+def align_x_axes_on_values(
+    axes: List[Axes],
+    align_values: Optional[List[float]] = None,
+    is_ticks_major: bool = True,
+) -> List[Any]:
+    """
+    Align the ticks of multiple x axes.
+
+    A new sets of ticks are computed for each axis in <axes> but with equal
+    length.
+    Source :
+    https://stackoverflow.com/questions/26752464/how-do-i-align-gridlines-for-two-y-axis-scales-using-matplotlib
+
+    Parameters
+    ----------
+    axes : List[Axes]
+        List of axes objects whose xaxis ticks are to be aligned.
+    align_values : None or list/tuple
+        If not None, should be a list/tuple of floats with same length as
+        <axes>. Values in <align_values> define where the corresponding
+        axes should be aligned up. E.g. [0, 100, -22.5] means the 0 in
+        axes[0], 100 in axes[1] and -22.5 in axes[2] would be aligned up.
+        If None, align (approximately) the lowest ticks in all axes.
+    is_ticks_major: bool, optional
+        Whether to consider only major ticks. The default is True.
+
+    Returns
+    -------
+        new_ticks (list): a list of new ticks for each axis in <axes>.
+    """
+    return _align_axes_on_values(axes, False, align_values, is_ticks_major)
 
 
 def align_y_axes_on_values(
@@ -420,8 +509,49 @@ def align_y_axes_on_values(
     -------
         new_ticks (list): a list of new ticks for each axis in <axes>.
     """
+    return _align_axes_on_values(axes, True, align_values, is_ticks_major)
+
+
+def _align_axes_on_values(
+    axes: List[Axes],
+    is_y_axis: bool = True,
+    align_values: Optional[List[float]] = None,
+    is_ticks_major: bool = True,
+) -> List[Any]:
+    """
+    Align the ticks of multiple axes.
+
+    A new sets of ticks are computed for each axis in <axes> but with equal
+    length.
+    Source :
+    https://stackoverflow.com/questions/26752464/how-do-i-align-gridlines-for-two-y-axis-scales-using-matplotlib
+
+    Parameters
+    ----------
+    axes : List[Axes]
+        List of axes objects whose x/y-axis ticks are to be aligned.
+    is_y_axis:
+        Whether to perform the alignment on the y-axis. If False, perform it on the
+        x axis. The default is True.
+    align_values : None or list/tuple
+        If not None, should be a list/tuple of floats with same length as
+        <axes>. Values in <align_values> define where the corresponding
+        axes should be aligned up. E.g. [0, 100, -22.5] means the 0 in
+        axes[0], 100 in axes[1] and -22.5 in axes[2] would be aligned up.
+        If None, align (approximately) the lowest ticks in all axes.
+    is_ticks_major: bool, optional
+        Whether to consider only major ticks. The default is True.
+
+    Returns
+    -------
+        new_ticks (list): a list of new ticks for each axis in <axes>.
+    """
     n_ax = len(axes)
-    ticks = [aii.get_yticks(minor=not is_ticks_major) for aii in axes]
+    if is_y_axis:
+        ticks = [aii.get_yticks(minor=not is_ticks_major) for aii in axes]
+    else:
+        ticks = [aii.get_xticks(minor=not is_ticks_major) for aii in axes]
+
     if align_values is None:
         aligns = [ticks[ii][0] for ii in range(n_ax)]
     else:
@@ -432,7 +562,10 @@ def align_y_axes_on_values(
         aligns = align_values
 
     # Get upper and lower bounds of each axis
-    bounds = [aii.get_ylim() for aii in axes]
+    if is_y_axis:
+        bounds = [aii.get_ylim() for aii in axes]
+    else:
+        bounds = [aii.get_xlim() for aii in axes]
 
     # align at some points
     ticks_align = [ticks[ii] - aligns[ii] for ii in range(n_ax)]
@@ -471,9 +604,33 @@ def align_y_axes_on_values(
 
     # set ticks for each axis
     for axii, tii in zip(axes, new_ticks):
-        axii.set_yticks(tii)
+        if is_y_axis:
+            axii.set_yticks(tii)
+        else:
+            axii.set_xticks(tii)
 
     return new_ticks
+
+
+def make_x_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
+    """
+    Make all given x axes symmetric in zero.
+
+    Always put 0 in the middle of the graph for all x axes.
+
+    Parameters
+    ----------
+    axes : List[Axes]
+        List of axes to adjust.
+
+    Returns
+    -------
+    None.
+
+    """
+    max_lims = np.max(np.abs(np.array([ax.get_xlim() for ax in axes])), axis=1)
+    for i, ax in enumerate(axes):
+        ax.set_xlim([-max_lims[i], max_lims[i]])
 
 
 def make_y_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
