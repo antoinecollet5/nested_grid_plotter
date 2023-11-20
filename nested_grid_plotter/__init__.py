@@ -24,7 +24,9 @@ Utility Functions
 
     add_grid_and_tick_prams_to_axis
     add_xaxis_twin_as_date
+    align_x_axes
     align_y_axes
+    align_x_axes_on_values
     align_y_axes_on_values
     extract_frames_from_embedded_html_animation
     get_line_style
@@ -32,6 +34,7 @@ Utility Functions
     hide_axis_ticklabels
     make_patch_spines_invisible
     make_ticks_overlapping_axis_frame_invisible
+    make_x_axes_symmetric_zero_centered
     make_y_axes_symmetric_zero_centered
     replace_bad_path_characters
 
@@ -51,6 +54,8 @@ from nested_grid_plotter.imshow import multi_imshow
 from nested_grid_plotter.utils import (
     add_grid_and_tick_prams_to_axis,
     add_xaxis_twin_as_date,
+    align_x_axes,
+    align_x_axes_on_values,
     align_y_axes,
     align_y_axes_on_values,
     extract_frames_from_embedded_html_animation,
@@ -59,6 +64,7 @@ from nested_grid_plotter.utils import (
     hide_axis_ticklabels,
     make_patch_spines_invisible,
     make_ticks_overlapping_axis_frame_invisible,
+    make_x_axes_symmetric_zero_centered,
     make_y_axes_symmetric_zero_centered,
     replace_bad_path_characters,
 )
@@ -77,8 +83,11 @@ __all__ = [
     "make_ticks_overlapping_axis_frame_invisible",
     "hide_axis_ticklabels",
     "hide_axis_spine",
+    "align_x_axes",
+    "align_x_axes_on_values",
     "align_y_axes",
     "align_y_axes_on_values",
+    "make_x_axes_symmetric_zero_centered",
     "make_y_axes_symmetric_zero_centered",
     "add_xaxis_twin_as_date",
     "multi_imshow",

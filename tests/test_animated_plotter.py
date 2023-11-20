@@ -159,7 +159,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
     s1 = [f"frame #{i}" for i in range(nb_frames)]
     s2 = [f"time = {i * 60} s" for i in range(nb_frames)]
     plotter.plot_animated_text(
-        plotter.ax_dict["ax11"], x=0.01, y=1.8, s=s2, fontstyle="italic", color="red"
+        plotter.ax_dict["ax11"], x=0.01, y=1.8, s=s2, color="red"
     )
     plotter.plot_animated_text(
         plotter.ax_dict["ax12"], x=0.01, y=1.8, s=s1, fontweight="bold"

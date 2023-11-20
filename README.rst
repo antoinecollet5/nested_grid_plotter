@@ -23,7 +23,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
     :target: https://pypi.org/pypi/nested-grid-plotter
     :alt: PyPI
 
-.. |Downloads| image:: https://pepy.tech/badge/nested-grid-plotter
+.. |Downloads| image:: https://static.pepy.tech/badge/nested-grid-plotter
     :target: https://pepy.tech/project/nested-grid-plotter
     :alt: Downoads
 

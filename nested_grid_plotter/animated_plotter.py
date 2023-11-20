@@ -288,7 +288,7 @@ class AnimatedPlotter(NestedGridPlotter):
             )
 
         if title:
-            ax.set_title(title, fontweight="bold", style="italic")
+            ax.set_title(title, fontweight="bold")
         if xlabel:
             ax.set_xlabel(xlabel, fontweight="bold")
         if ylabel:
@@ -411,7 +411,7 @@ class AnimatedPlotter(NestedGridPlotter):
             data_list.append(values)
 
             ax.label_outer()
-            ax.set_title(label, style="italic", weight="bold")
+            ax.set_title(label, weight="bold")
             if xlabel is not None:
                 ax.set_xlabel(xlabel, fontweight="bold")
             if ylabel is not None:
