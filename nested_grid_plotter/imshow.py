@@ -232,8 +232,7 @@ def multi_imshow(
         images_dict[label] = ax.imshow(values.T, **copy.deepcopy(_imshow_kwargs))
 
         ax.label_outer()
-        ax.set_title(label, style="italic", fontweight="bold")
-        ax.set_title(label, style="italic", fontweight="bold")
+        ax.set_title(label, fontweight="bold")
         if xlabel is not None:
             ax.set_xlabel(xlabel, fontweight="bold")
         if ylabel is not None:
