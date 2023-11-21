@@ -7,17 +7,15 @@ version: 2
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-  configuration: docs/source/conf.py
+  configuration: docs/sources/conf.py
 
 build:
-  os: ubuntu-20.04  # <- add this line
+  os: ubuntu-22.04
   tools:
-    python: "3.8"
-  image: latest
+    python: "3.9"
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
-  version: 3.8
   install:
     - requirements: requirements_dev.txt
     - method: pip
