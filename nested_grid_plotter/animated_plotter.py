@@ -306,7 +306,7 @@ class AnimatedPlotter(NestedGridPlotter):
 
         def _animate(frame_index: int) -> List[Line2D]:
             """Update the data of the plot."""
-            # substract -1 to nb_steps and _nb_frames so that when
+            # subtract -1 to nb_steps and _nb_frames so that when
             # frame_index = 0, we get the first element of x_list, and when
             # frame_index = _nb_frames - 1, we get the last element of x_list.
             data_index: int = int((nb_steps - 1) / (_nb_frames - 1) * frame_index)
@@ -474,7 +474,7 @@ class AnimatedPlotter(NestedGridPlotter):
 
         def _animate(frame_index: int) -> List[AxesImage]:
             """Update the data of the plot."""
-            # substract -1 to nb_steps and _nb_frames so that when
+            # subtract -1 to nb_steps and _nb_frames so that when
             # frame_index = 0, we get the first element of x_list, and when
             # frame_index = _nb_frames - 1, we get the last element of x_list.
             data_index: int = int((nb_steps - 1) / (_nb_frames - 1) * frame_index)
