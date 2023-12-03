@@ -2,6 +2,15 @@
 Changelog
 ==============
 
+0.1.2 (2023-12-03)
+------------------
+
+* FIX: Selection of data in animations - when the amount of data is 
+  larger than the number of frames. The fix ensures that the first frame 
+  is the first data element and that the last frame is the last data 
+  element, all other frames matching evenly spaced data element in between.
+* DOCS: update animated_plotters.ipynb notebook
+
 0.1.1 (2023-11-20)
 ------------------
 
