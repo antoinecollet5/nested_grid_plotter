@@ -9,7 +9,7 @@ follow the same order.
 
 import re
 from contextlib import contextmanager
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,7 +22,7 @@ from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,
-    _scale_cbar,
+    _norm_data_and_cbar,
     add_2d_grid,
     multi_imshow,
 )
@@ -95,9 +95,12 @@ def test_add_2d_grid() -> None:
 
 
 @pytest.mark.parametrize(
-    "is_symetric,is_log", [(False, False), (False, True), (True, False), (True, True)]
+    "is_symmetric,imshow_kwargs",
+    [(False, {}), (False, {}), (True, {}), (True, {})],
 )  # tiff is too heavy
-def test_scale_cbar(is_symetric: bool, is_log: bool) -> None:
+def test_normalize_data_and_cbar(
+    is_symmetric: bool, imshow_kwargs: Dict[str, Any]
+) -> None:
     fig, (ax1, ax2) = get_2_axes()
 
     data1 = np.random.uniform(low=-1.0, high=1.0, size=(10, 10))
@@ -109,13 +112,15 @@ def test_scale_cbar(is_symetric: bool, is_log: bool) -> None:
     im2 = ax2.imshow(data2)
     assert 4.0 > im2.norm.vmin > 0.5
     assert 4.0 > im2.norm.vmax > 0.5
-    _scale_cbar([im1, im2], [data1, data2], is_symetric_cbar=is_symetric, is_log=is_log)
+    _norm_data_and_cbar(
+        [im1, im2], [data1, data2], imshow_kwargs, is_symmetric_cbar=is_symmetric
+    )
     assert im1.norm.vmax == im2.norm.vmax
     assert im1.norm.vmin == im2.norm.vmin
     assert im1.norm.vmax > 1.0
     assert 0.5 > im2.norm.vmin
 
-    if is_symetric:
+    if is_symmetric:
         assert im1.norm.vmin == -im1.norm.vmax == -np.max(data2)
 
 
@@ -141,21 +146,36 @@ def test_check_axes_and_data_consistency(data, expected_exception) -> None:
 
 
 @pytest.mark.parametrize(
-    "is_symetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel",
+    "is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel,expected_exception",
     [
-        (False, None, None, None, None),
-        (True, "my title", {"vmin": 2.0, "vmax": 5.0}, "xlab", "ylab"),
+        (False, None, None, None, None, does_not_raise()),
+        (
+            True,
+            "my title",
+            {"vmin": 2.0, "vmax": 5.0},
+            "xlab",
+            "ylab",
+            does_not_raise(),
+        ),
         (
             True,
             "my title",
             {"norm": colors.LogNorm(vmin=1e-6, vmax=100.0)},
             "xlab",
             "ylab",
+            pytest.warns(
+                UserWarning,
+                match=(
+                    "You used a LogNorm norm instance which is incompatible with a"
+                    " symmetric colorbar. Symmetry is ignored. Use SymLogNorm for"
+                    " symmetrical logscale color bar."
+                ),
+            ),
         ),
     ],
 )
 def test_multi_imshow(
-    is_symetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel
+    is_symmetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel, expected_exception
 ) -> None:
     fig, axes = get_2_axes()
     data = {
@@ -163,16 +183,17 @@ def test_multi_imshow(
         "data2": np.random.uniform(low=0.5, high=4.0, size=(10, 10)),
     }
 
-    multi_imshow(
-        axes,
-        fig,
-        data,
-        is_symetric_cbar=is_symetric_cbar,
-        cbar_title=cbar_title,
-        imshow_kwargs=imshow_kwargs,
-        xlabel=xlabel,
-        ylabel=ylabel,
-    )
+    with expected_exception:
+        multi_imshow(
+            axes,
+            fig,
+            data,
+            is_symmetric_cbar=is_symmetric_cbar,
+            cbar_title=cbar_title,
+            imshow_kwargs=imshow_kwargs,
+            xlabel=xlabel,
+            ylabel=ylabel,
+        )
 
 
 def test_multi_imshow_exception() -> None:
