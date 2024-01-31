@@ -2,6 +2,13 @@
 Changelog
 ==============
 
+1.0.0 (2024-01-31)
+------------------
+
+* FIX: Typo = symetry to symmetry in keywords.
+* FIX: Colorbar scaling = now supports any norm and some duplication has been removed,
+  some warnigns added.
+  
 0.1.2 (2023-12-03)
 ------------------
 
