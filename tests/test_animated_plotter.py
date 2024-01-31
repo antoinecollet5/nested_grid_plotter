@@ -6,6 +6,7 @@ follow the same order.
 
 @author: Antoine COLLET
 """
+
 import itertools
 import re
 from contextlib import contextmanager
