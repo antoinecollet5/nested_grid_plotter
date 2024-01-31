@@ -184,8 +184,9 @@ def _norm_data_and_cbar(
 
     vmin, vmax = _get_vmin_vmax(
         data,
-        _imshow_kwargs.get("vmin", norm.vmin),
-        _imshow_kwargs.get("vmax", norm.vmax),
+        is_symmetric_cbar,
+        norm.vmin if norm.vmin is not None else _imshow_kwargs.get("vmin"),
+        norm.vmax if norm.vmax is not None else _imshow_kwargs.get("vmax"),
     )
     norm.vmin = vmin
     norm.vmax = vmax
