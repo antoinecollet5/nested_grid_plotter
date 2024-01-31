@@ -182,7 +182,11 @@ def _norm_data_and_cbar(
         )
         is_symmetric_cbar = False
 
-    vmin, vmax = _get_vmin_vmax(data, is_symmetric_cbar, norm.vmin, norm.vmax)
+    vmin, vmax = _get_vmin_vmax(
+        data,
+        _imshow_kwargs.get("vmin", norm.vmin),
+        _imshow_kwargs.get("vmax", norm.vmax),
+    )
     norm.vmin = vmin
     norm.vmax = vmax
     for im in images:
