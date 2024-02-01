@@ -6,6 +6,7 @@ follow the same order.
 
 @author: Antoine COLLET
 """
+
 import itertools
 import re
 from contextlib import contextmanager
@@ -307,7 +308,7 @@ def test_1D_exceptions_6() -> None:
 
 
 @pytest.mark.parametrize(
-    "is_fig,is_symetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel",
+    "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel",
     [
         (True, False, None, None, None, None),
         (True, True, "my title", {"vmin": 2.0, "vmax": 5.0}, "xlab", "ylab"),
@@ -322,7 +323,7 @@ def test_1D_exceptions_6() -> None:
     ],
 )
 def test_animated_multi_imshow(
-    tmp_folder, is_fig, is_symetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel
+    tmp_folder, is_fig, is_symmetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel
 ) -> None:
     plotter = make_2_frames_plotter()
 
@@ -357,7 +358,7 @@ def test_animated_multi_imshow(
         cbar_title=cbar_title,
         xlabel=xlabel,
         ylabel=ylabel,
-        is_symetric_cbar=is_symetric_cbar,
+        is_symmetric_cbar=is_symmetric_cbar,
     )
     # plotter.close() -> this crashes on github pipelines
     plotter.animate(nb_frames=nb_frames)

@@ -47,6 +47,7 @@ Plot functions
     multi_imshow
 
 """
+
 from nested_grid_plotter.__about__ import __author__, __name__, __version__
 from nested_grid_plotter.animated_plotter import AnimatedPlotter
 from nested_grid_plotter.base_plotter import NestedGridPlotter

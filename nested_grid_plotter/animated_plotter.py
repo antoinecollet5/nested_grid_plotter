@@ -1,11 +1,11 @@
 """Offer a field plotter."""
+
 import copy
 import warnings
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
 
 import numpy as np
 import numpy.typing as npt
-from matplotlib import colors
 from matplotlib.animation import FuncAnimation
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
@@ -19,7 +19,7 @@ from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,
-    _scale_cbar,
+    _norm_data_and_cbar,
 )
 
 # pylint: disable=C0103 # does not confrom to snake case naming style
@@ -336,7 +336,7 @@ class AnimatedPlotter(NestedGridPlotter):
         ylabel: Optional[str] = None,
         imshow_kwargs: Optional[Dict[str, Any]] = None,
         cbar_kwargs: Optional[Dict[str, Any]] = None,
-        is_symetric_cbar: bool = False,
+        is_symmetric_cbar: bool = False,
         cbar_title: Optional[str] = None,
     ) -> Colorbar:
         """
@@ -428,28 +428,13 @@ class AnimatedPlotter(NestedGridPlotter):
                 "Not all given arrays have the same number of steps (last dimension)!"
             )
 
-        # Colorbar scaling
-        norm: Optional[colors.Normalize] = _imshow_kwargs.get("norm")
-        if norm is not None:
-            vmin: Optional[float] = norm.vmin
-            vmax: Optional[float] = norm.vmax
-            if isinstance(norm, colors.LogNorm):
-                _scale_cbar(
-                    list(images_dict.values()),
-                    list(data.values()),
-                    False,
-                    is_log=True,
-                    vmin=vmin,
-                    vmax=vmax,
-                )
-            elif isinstance(_imshow_kwargs.get("norm"), colors.Normalize):
-                _scale_cbar(
-                    list(images_dict.values()),
-                    list(data.values()),
-                    is_symetric_cbar,
-                    vmin=vmin,
-                    vmax=vmax,
-                )
+        # norm both data and colobar
+        _norm_data_and_cbar(
+            list(images_dict.values()),
+            list(data.values()),
+            _imshow_kwargs,
+            is_symmetric_cbar,
+        )
 
         if fig is None:
             _fig: Union[Figure, SubFigure] = self.fig

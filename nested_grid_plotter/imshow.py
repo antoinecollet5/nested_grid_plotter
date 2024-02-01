@@ -1,7 +1,8 @@
 """Provide some tools for 2D plots."""
 
 import copy
-from typing import Any, Dict, List, Optional, Sequence, Union
+import warnings
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -86,27 +87,21 @@ def add_2d_grid(
     )
 
 
-def _scale_cbar(
-    images: List[AxesImage],
+def _get_vmin_vmax(
     data_list: List[npt.NDArray[np.float64]],
-    is_symetric_cbar: bool,
-    is_log: bool = False,
+    is_symmetric_cbar: bool,
     vmin: Optional[float] = None,
     vmax: Optional[float] = None,
-) -> None:
+) -> Tuple[float, float]:
     """
-    Scale the color bar span to the input data.
+    Get vmin and vmax for the color bar scaling.
 
     Parameters
     ----------
-    images : List[AxesImage]
-        List of images for which to scale the colorbar.
     data_list : List[np.ndarray]
         List of arrays containing the data.
-    is_symetric_cbar : bool
+    is_symmetric_cbar : bool
         Does the scale need to be symmetric and centered to zero. The default is False.
-    is_log : bool, optional
-        Does the scale need to be logarithmic. The default is False.
     vmin: Optional[float]
         Minimum value for the scale. If not provided, it is automatically derived
         from the data. The default is None.
@@ -114,21 +109,16 @@ def _scale_cbar(
         Maximum value for the scale. If not provided, it is automatically derived
         from the data. The default is None.
     """
-    # Find the min and max of all colors for use in setting the color scale.
+
     if vmin is None:
         vmin = np.nanmin([np.nanmin(data) for data in data_list])
     if vmax is None:
         vmax = np.nanmax([np.nanmax(data) for data in data_list])
-    if is_symetric_cbar:
+    if is_symmetric_cbar:
         abs_norm = max(abs(vmin), abs(vmax))
         vmin = -abs_norm
         vmax = abs_norm
-    if is_log:
-        norm = colors.LogNorm(vmin=vmin, vmax=vmax)
-    else:
-        norm = colors.Normalize(vmin=vmin, vmax=vmax)
-    for im in images:
-        im.set_norm(norm)
+    return vmin, vmax
 
 
 def _check_axes_and_data_consistency(
@@ -162,6 +152,48 @@ def _check_axes_and_data_consistency(
         )
 
 
+def _norm_data_and_cbar(
+    images: List[AxesImage],
+    data: List[npt.NDArray[np.float64]],
+    _imshow_kwargs: Dict[str, Any],
+    is_symmetric_cbar: bool,
+) -> None:
+    """
+    Apply a proper scaling to the colorbar based on data and user provided norm.
+
+    Parameters
+    ----------
+    images_dict : Dict[str, AxesImage]
+        Dict of images for which to scale the colorbar.
+    data_list : Dict[str, npt.NDArray[np.float64]]
+        Dict of arrays containing the data.
+    _imshow_kwargs: Dict[str, Any]
+        Keywords arguments for imshow.
+    is_symmetric_cbar : bool
+        Does the scale need to be symmetric and centered to zero. The default is False.
+    """
+    norm: colors.Normalize = _imshow_kwargs.get("norm", colors.Normalize())
+    if isinstance(norm, colors.LogNorm) and is_symmetric_cbar:
+        warnings.warn(
+            "You used a LogNorm norm instance which is incompatible with a"
+            " symmetric colorbar. Symmetry is ignored. Use SymLogNorm for"
+            " symmetrical logscale color bar.",
+            UserWarning,
+        )
+        is_symmetric_cbar = False
+
+    vmin, vmax = _get_vmin_vmax(
+        data,
+        is_symmetric_cbar,
+        norm.vmin if norm.vmin is not None else _imshow_kwargs.get("vmin"),
+        norm.vmax if norm.vmax is not None else _imshow_kwargs.get("vmax"),
+    )
+    norm.vmin = vmin
+    norm.vmax = vmax
+    for im in images:
+        im.set_norm(norm)
+
+
 def multi_imshow(
     axes: Sequence[Axes],
     fig: Union[Figure, SubFigure],
@@ -170,7 +202,7 @@ def multi_imshow(
     ylabel: Optional[str] = None,
     imshow_kwargs: Optional[Dict[str, Any]] = None,
     cbar_kwargs: Optional[Dict[str, Any]] = None,
-    is_symetric_cbar: bool = False,
+    is_symmetric_cbar: bool = False,
     cbar_title: Optional[str] = None,
 ) -> Colorbar:
     """
@@ -193,7 +225,7 @@ def multi_imshow(
         Optional arguments for `plt.imshow`. The default is None.
     cbar_kwargs : Optional[Dict[str, Any]], optional
         DESCRIPTION. The default is None.
-    is_symetric_cbar : bool, optional
+    is_symmetric_cbar : bool, optional
         Does the scale need to be symmetric and centered to zero. The default is False.
     cbar_title : Optional[str], optional
         Label to give to the colorbar. The default is None.
@@ -238,27 +270,13 @@ def multi_imshow(
         if ylabel is not None:
             ax.set_ylabel(ylabel, fontweight="bold")
 
-    norm: Optional[colors.Normalize] = _imshow_kwargs.get("norm")
-    if norm is not None:
-        vmin: Optional[float] = norm.vmin
-        vmax: Optional[float] = norm.vmax
-        if isinstance(norm, colors.LogNorm):
-            _scale_cbar(
-                list(images_dict.values()),
-                list(data.values()),
-                False,
-                is_log=True,
-                vmin=vmin,
-                vmax=vmax,
-            )
-        elif isinstance(_imshow_kwargs.get("norm"), colors.Normalize):
-            _scale_cbar(
-                list(images_dict.values()),
-                list(data.values()),
-                is_symetric_cbar,
-                vmin=vmin,
-                vmax=vmax,
-            )
+        # norm both data and colobar
+        _norm_data_and_cbar(
+            list(images_dict.values()),
+            list(data.values()),
+            _imshow_kwargs,
+            is_symmetric_cbar,
+        )
 
     cbar: Colorbar = fig.colorbar(list(images_dict.values())[0], **_cbar_kwargs)
     if cbar_title is not None:

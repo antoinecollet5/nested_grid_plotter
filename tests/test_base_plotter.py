@@ -6,6 +6,7 @@ follow the same order. The
 
 @author: Antoine COLLET
 """
+
 from contextlib import contextmanager
 from itertools import product
 

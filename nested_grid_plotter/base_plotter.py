@@ -4,6 +4,7 @@ Provide plotter classes.
 These classes allows to wrap the creation of figures with matplotlib and to use
 a unified framework.
 """
+
 from collections import ChainMap
 from itertools import product
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
