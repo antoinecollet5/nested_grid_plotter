@@ -24,7 +24,7 @@ numpydoc
 jinja2==3.0.3
 
 pre-commit
-black>=24.1.1
+black~=23.1.0
 isort>=5.10.1
 codespell
 

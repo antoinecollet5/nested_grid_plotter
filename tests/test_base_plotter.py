@@ -406,7 +406,9 @@ def generate_legend_test_figure() -> NestedGridPlotter:
     x = np.linspace(0, 2, 100)  # Sample data.
     for ax_name, ax in _plotter.ax_dict.items():
         ax.plot(x, x, label=f"linear {ax_name}")  # Plot some data on the axes.
-        ax.plot(x, x**2, label=f"quadratic {ax_name}")  # Plot more data on the axes...
+        ax.plot(
+            x, x**2, label=f"quadratic {ax_name}"
+        )  # Plot more data on the axes...
         ax.plot(x, x**3, label=f"cubic {ax_name}")  # ... and some more.
     return _plotter
 
