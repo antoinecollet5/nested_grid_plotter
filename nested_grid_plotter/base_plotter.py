@@ -311,6 +311,17 @@ class NestedGridPlotter:
         # Ensure that all artists are saved (nothing should be cropped)
         # https://stackoverflow.com/questions/9651092/my-matplotlib-pyplot-legend-is-being-cut-off/42303455
         bbox_inches = kwargs.pop("bbox_inches", "tight")
+        # make sure that if a fig legend as been added, it won't be cutoff by
+        # the figure box
+        kwargs.update(
+            {
+                "bbox_extra_artists": (
+                    *kwargs.get("bbox_extra_artists", ()),
+                    *self.fig.legends,
+                    *[lgd for fig in self.subfigs.values() for lgd in fig.legends],
+                )
+            }
+        )
         res = self.fig.savefig(*args, **kwargs, bbox_inches=bbox_inches)
         # need this if 'transparent=True' to reset colors
         self.fig.canvas.draw_idle()
@@ -617,6 +628,11 @@ class NestedGridPlotter:
         self._additional_handles = {}
         self._additional_labels = {}
 
+        # Remove a potentially existing legends on fig and subfigs
+        self.clear_fig_legends()
+
+    def clear_fig_legends(self) -> None:
+        """Remove all added figure legends"""
         # Remove a potentially existing legends on fig and subfigs
         self.fig.legends.clear()
         for subfig in self.subfigs.values():

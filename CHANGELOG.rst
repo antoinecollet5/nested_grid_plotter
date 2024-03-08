@@ -2,6 +2,12 @@
 Changelog
 ==============
 
+1.0.1 (2024-03-08)
+------------------
+
+* FIX: Prevent figures an subfigures legend cut-off by th figure box when saving images
+  to disk.
+
 1.0.0 (2024-01-31)
 ------------------
 
