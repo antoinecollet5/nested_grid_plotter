@@ -5,6 +5,7 @@ These classes allows to wrap the creation of figures with matplotlib and to use
 a unified framework.
 """
 
+import copy
 from collections import ChainMap
 from itertools import product
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -535,6 +536,13 @@ class NestedGridPlotter:
             obj: Union[Figure, SubFigure] = self.fig
         else:
             obj: Union[Figure, SubFigure] = self.subfigs[name]
+
+        # Make sure that the figure of the handles is the figure of the legend
+        # RunTimeError Can not put single artist in more than one figure
+        for i in range(len(handles)):
+            if handles[i].figure is not obj:
+                handles[i] = copy.copy(handles[i])
+                handles[i].figure = obj
 
         # Remove a potentially existing legend
         obj.legends.clear()
