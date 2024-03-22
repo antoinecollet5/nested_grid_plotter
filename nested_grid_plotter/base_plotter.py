@@ -138,7 +138,9 @@ class NestedGridPlotter:
     @property
     def ax_dict(self) -> Dict[str, Axes]:
         """Return a flatten version of `ax_dict`."""
-        return dict(ChainMap(*reversed(self.grouped_ax_dict.values())))
+        # we cannot use reversed because of dicts are not reversible in py3.7
+        # so we convert to list and reverse instead
+        return dict(ChainMap(*list(self.grouped_ax_dict.values())[::-1]))
 
     @property
     def axes(self) -> List[Axes]:
