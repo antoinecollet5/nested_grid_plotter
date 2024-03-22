@@ -4,9 +4,10 @@ Utilities for matplotlib.
 
 import base64
 import re
+import string
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -731,3 +732,42 @@ def add_xaxis_twin_as_date(
         tick.set_rotation(date_rotation)
 
     return ax2
+
+
+def add_letter_to_frames(axes: Sequence[Axes]) -> None:
+    """
+    Add a letter at the top left hand corner of the frame of the given axes.
+
+    If more than 26 frames are provided, the letters are complemented by a numeral
+    suffix, e.g., a-1, b-1, c-1, ... z-1, a-2, b-2, ...
+
+    Parameters
+    ----------
+    axes : Sequence[Axes]
+        Sequence of axes to label.
+    """
+    # dict of letters
+    d = dict(enumerate(string.ascii_lowercase, 1))
+
+    if len(axes) <= 26:
+
+        def _get_letter(_i: int) -> str:
+            return d[_i + 1]
+
+    else:  # need to add numbers to letters
+
+        def _get_letter(_i: int) -> str:
+            return f"{d[_i%26 + 1]}-{_i//26+1}"
+
+    for i, ax in enumerate(axes):
+        ax.text(
+            0.0,
+            1.0,
+            _get_letter(i),
+            color="k",
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontweight="bold",
+            bbox=dict(facecolor="white", edgecolor="k", pad=5.0),
+        )

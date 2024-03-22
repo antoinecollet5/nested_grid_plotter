@@ -545,3 +545,19 @@ def test_add_xaxis_twin_as_date() -> None:
             time_format="%Y",
             spine_outward_position=38,
         )
+
+
+def test_add_letter_to_frames_less26axes() -> None:
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (10, 10)},
+        subfigs_params={"ncols": 3, "nrows": 3},
+    )
+    ngp.add_letter_to_frames(plotter.axes)
+
+
+def test_add_letter_to_frames_more26axes() -> None:
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (10, 10)},
+        subfigs_params={"ncols": 7, "nrows": 7},
+    )
+    ngp.add_letter_to_frames(plotter.axes)
