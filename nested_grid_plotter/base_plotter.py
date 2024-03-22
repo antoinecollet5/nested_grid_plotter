@@ -374,6 +374,23 @@ class NestedGridPlotter:
             raise ValueError(f'The axis "{ax_name}" does not exists!')
         return self.ax_dict[ax_name]
 
+    def get_axes(self, ax_names: Sequence[str]) -> List[Axes]:
+        """
+        Get a sequence of axes from the plotter.
+
+        Parameters
+        ----------
+        ax_names : Sequence[str]
+            Name of the axes to get. Must be iterable.
+
+        Returns
+        -------
+        Axes
+            The desired axes.
+
+        """
+        return [self.get_axis(axn) for axn in ax_names]
+
     def get_subfigure(self, subfig_name: str) -> SubFigure:
         """
         Get an axis from the plotter.
