@@ -5,6 +5,7 @@ These classes allows to wrap the creation of figures with matplotlib and to use
 a unified framework.
 """
 
+import copy
 from collections import ChainMap
 from itertools import product
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -137,7 +138,9 @@ class NestedGridPlotter:
     @property
     def ax_dict(self) -> Dict[str, Axes]:
         """Return a flatten version of `ax_dict`."""
-        return dict(ChainMap(*self.grouped_ax_dict.values()))
+        # we cannot use reversed because of dicts are not reversible in py3.7
+        # so we convert to list and reverse instead
+        return dict(ChainMap(*list(self.grouped_ax_dict.values())[::-1]))
 
     @property
     def axes(self) -> List[Axes]:
@@ -373,6 +376,23 @@ class NestedGridPlotter:
             raise ValueError(f'The axis "{ax_name}" does not exists!')
         return self.ax_dict[ax_name]
 
+    def get_axes(self, ax_names: Sequence[str]) -> List[Axes]:
+        """
+        Get a sequence of axes from the plotter.
+
+        Parameters
+        ----------
+        ax_names : Sequence[str]
+            Name of the axes to get. Must be iterable.
+
+        Returns
+        -------
+        Axes
+            The desired axes.
+
+        """
+        return [self.get_axis(axn) for axn in ax_names]
+
     def get_subfigure(self, subfig_name: str) -> SubFigure:
         """
         Get an axis from the plotter.
@@ -535,6 +555,13 @@ class NestedGridPlotter:
             obj: Union[Figure, SubFigure] = self.fig
         else:
             obj: Union[Figure, SubFigure] = self.subfigs[name]
+
+        # Make sure that the figure of the handles is the figure of the legend
+        # RunTimeError Can not put single artist in more than one figure
+        for i in range(len(handles)):
+            if handles[i].figure is not obj:
+                handles[i] = copy.copy(handles[i])
+                handles[i].figure = obj
 
         # Remove a potentially existing legend
         obj.legends.clear()

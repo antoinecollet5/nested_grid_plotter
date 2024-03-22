@@ -2,6 +2,14 @@
 Changelog
 ==============
 
+1.1.1 (2024-03-22)
+------------------
+
+* ENH: Add a `get_axes` interface to `NestedGridPlotter` class.
+* ENH: Provide a `add_letter_to_frames` utility function.
+* FIX: RunTimeError Can not put single artist in more than one figure when using
+* NestedGridPlotter `add_fig_legend` method and using the main figure.
+
 1.0.1 (2024-03-08)
 ------------------
 

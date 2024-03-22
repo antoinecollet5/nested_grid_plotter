@@ -37,6 +37,7 @@ Utility Functions
     make_x_axes_symmetric_zero_centered
     make_y_axes_symmetric_zero_centered
     replace_bad_path_characters
+    add_letter_to_frames
 
 Plot functions
 ==============
@@ -54,6 +55,7 @@ from nested_grid_plotter.base_plotter import NestedGridPlotter
 from nested_grid_plotter.imshow import multi_imshow
 from nested_grid_plotter.utils import (
     add_grid_and_tick_prams_to_axis,
+    add_letter_to_frames,
     add_xaxis_twin_as_date,
     align_x_axes,
     align_x_axes_on_values,
@@ -92,4 +94,5 @@ __all__ = [
     "make_y_axes_symmetric_zero_centered",
     "add_xaxis_twin_as_date",
     "multi_imshow",
+    "add_letter_to_frames",
 ]

@@ -359,6 +359,22 @@ def test_get_axis() -> None:
         plotter.get_axis("test")
 
 
+def test_get_axes() -> None:
+    plotter = gen_complex_example_fig()
+    # Get an axis
+    for ax in plotter.get_axes(["lt1", "l2", "bt2"]):
+        assert isinstance(ax, Axes)
+
+    for ax in plotter.get_axes(["lt1"]):
+        assert isinstance(ax, Axes)
+
+    for ax in plotter.get_axes(list(plotter.ax_dict.keys())):
+        assert isinstance(ax, Axes)
+
+    with pytest.raises(ValueError, match='The axis "test" does not exists!'):
+        plotter.get_axes(["test"])
+
+
 def test_get_subfigure() -> None:
     plotter = gen_complex_example_fig()
     # Get a subfigure
