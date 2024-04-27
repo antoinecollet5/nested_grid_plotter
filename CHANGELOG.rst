@@ -2,6 +2,11 @@
 Changelog
 ==============
 
+1.1.2 (2024-04-27)
+------------------
+
+* FIX: bbox_extra_artists when using savefig method.
+
 1.1.1 (2024-03-22)
 ------------------
 
