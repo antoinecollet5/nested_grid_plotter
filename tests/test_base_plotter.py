@@ -7,6 +7,7 @@ follow the same order. The
 @author: Antoine COLLET
 """
 
+import struct
 from contextlib import contextmanager
 from itertools import product
 
@@ -313,14 +314,96 @@ def test_error_same_axis_names_used_in_multiple_subfigures():
         )
 
 
-def test_savefig(tmp_path_factory):
+def test_savefig(tmp_path_factory) -> None:
     tmp_folder = tmp_path_factory.mktemp("data")
     plotter = NestedGridPlotter()
     ax = plotter.ax_dict["ax1-1"]
     x = np.linspace(0, 2, 100)  # Sample data.
     ax.plot(x, x, label="linear")
     ax.legend()
+
     plotter.savefig(tmp_folder.joinpath("test_fig"))
+
+
+def test_savefif_with_legend(tmp_path_factory) -> None:
+    tmp_folder = tmp_path_factory.mktemp("data")
+
+    plotter = gen_complex_example_fig()
+    x = np.linspace(0, 2, 100)  # Sample data.
+    for ax_name, ax in plotter.ax_dict.items():
+        ax.plot(x, x, label=f"linear {ax_name}")  # Plot some data on the axes.
+        ax.plot(
+            x, x**2, label=f"quadratic {ax_name}"
+        )  # Plot more data on the axes...
+        ax.plot(x, x**3, label=f"cubic {ax_name}")  # ... and some more.
+
+    # Add some lines and spans and add it to the legend
+    handle = plotter.ax_dict["lt1"].axvline(
+        x=1.0, color="k", linewidth=3, linestyle="--"
+    )
+    plotter.add_extra_legend_item("lt1", handle, "My left extra legend item")
+
+    handle = plotter.ax_dict["lb1"].axvspan(xmin=0.25, xmax=0.75, color="yellow")
+    plotter.add_extra_legend_item("lt1", handle, "My left span")
+
+    handle = plotter.ax_dict["l2"].axhline(
+        y=4.0, xmin=0.2, xmax=0.8, color="r", linewidth=3, linestyle="--"
+    )
+    plotter.add_extra_legend_item("l2", handle, "My right extra legend item")
+
+    handle = plotter.ax_dict["l2"].axhspan(ymin=1.0, ymax=7.0, color="blue", alpha=0.3)
+    plotter.add_extra_legend_item("l2", handle, "My right span")
+
+    # Add the legend to subfigures (we place it to the bottom)
+    plotter.add_fig_legend(
+        name="the_left_sub_figure",
+        fontsize=10,
+        ncol=2,
+        bbox_x_shift=-0.25,
+        bbox_y_shift=-0.06,
+    )
+    plotter.add_fig_legend(
+        name="the_right_sub_figure",
+        fontsize=10,
+        ncol=2,
+        bbox_x_shift=+0.25,
+        bbox_y_shift=-0.06,
+    )
+
+    # Add a title
+    plotter.fig.suptitle("Main figure suptitle")
+    plotter.subfigs["the_left_sub_figure"].supxlabel("Left figure supxlabel")
+    plotter.subfigs["the_left_sub_figure"].supylabel("Left sub figure supylabel")
+
+    # Add the "full" fig legend just for the example (we place it to the top)
+    _ = plotter.add_fig_legend(fontsize=10, loc="top", ncol=4, bbox_y_shift=+0.06)
+
+    # Now we save the figure.
+    dpi = 72
+    savepath = tmp_folder.joinpath("with_plt_savefig.png")
+    # save the figure with matplotlib built-in method
+    plotter.fig.savefig(savepath, dpi=dpi)
+
+    # This size of the figure should be unchanged => the figure legends are ignored.
+    with open(savepath, "rb") as f:
+        data = f.read()
+    w, h = struct.unpack(">LL", data[16:24])
+    expected_fig_size = plotter.fig.get_size_inches()
+    np.testing.assert_equal(expected_fig_size * dpi, np.array([int(w), int(h)]))
+
+    # Now we use our implementation
+    savepath2 = tmp_folder.joinpath("with_plotter_savefig.png")
+    # save the figure
+    plotter.savefig(savepath2, dpi=dpi)
+
+    # Assert the size of the save figure with native python
+    with open(savepath2, "rb") as f2:
+        data2 = f2.read()
+    w2, h2 = struct.unpack(">LL", data2[16:24])
+    # The default behavior is to use tight_layout = True. So the added figure are taken
+    # into account and the figure size is increased.
+    assert int(w2) > int(w)
+    assert int(h2) > int(h)
 
 
 def test_close() -> None:

@@ -316,15 +316,19 @@ class NestedGridPlotter:
         bbox_inches = kwargs.pop("bbox_inches", "tight")
         # make sure that if a fig legend as been added, it won't be cutoff by
         # the figure box
-        kwargs.update(
-            {
-                "bbox_extra_artists": (
-                    *kwargs.get("bbox_extra_artists", ()),
-                    *self.fig.legends,
-                    *[lgd for fig in self.subfigs.values() for lgd in fig.legends],
-                )
-            }
-        )
+        bbox_extra_artists = [
+            *kwargs.get("bbox_extra_artists", ()),
+            *self.fig.legends,
+            *[lgd for fig in self.subfigs.values() for lgd in fig.legends],
+        ]
+        for fig in [self.fig, *self.subfigs.values()]:
+            if fig._supxlabel is not None:
+                bbox_extra_artists.append(fig._supxlabel)
+            if fig._supylabel is not None:
+                bbox_extra_artists.append(fig._supylabel)
+            if fig._suptitle is not None:
+                bbox_extra_artists.append(fig._suptitle)
+        kwargs.update({"bbox_extra_artists": tuple(bbox_extra_artists)})
         res = self.fig.savefig(*args, **kwargs, bbox_inches=bbox_inches)
         # need this if 'transparent=True' to reset colors
         self.fig.canvas.draw_idle()
