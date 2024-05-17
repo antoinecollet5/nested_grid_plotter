@@ -11,11 +11,13 @@ import struct
 from contextlib import contextmanager
 from itertools import product
 
+import matplotlib as mpl
 import numpy as np
 import pytest
 from matplotlib.axes import Axes
 from matplotlib.figure import SubFigure
 from matplotlib.lines import Line2D
+from packaging.version import Version
 
 from nested_grid_plotter import NestedGridPlotter
 
@@ -542,7 +544,10 @@ def test_axis_and_fig_add_legend():
         plotter.add_axis_legend(ax_name, fontsize=10)
     for ax_name, ax in plotter.ax_dict.items():
         # Handles
-        assert len(ax.legend_.legendHandles) == 3
+        if Version(mpl.__version__) >= Version("3.7"):
+            assert len(ax.legend_.legend_handles) == 3
+        else:
+            assert len(ax.legend_.legendHandles) == 3
         # Labels
         assert [t._text for t in ax.legend_.texts] == [
             f"linear {ax_name}",
