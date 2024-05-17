@@ -13,9 +13,9 @@ flake8-html
 ruff
 
 # doc
-nbsphinx==0.8.6
+nbsphinx
 nbsphinx-link
-sphinx>=3 # jupyter_sphinx requires sphinx>=2
+sphinx~=7.3.6 # jupyter_sphinx requires sphinx>=2
 jupyter_sphinx>=0.3.2
 sphinxcontrib-plantuml
 pygments>=2.6.1
