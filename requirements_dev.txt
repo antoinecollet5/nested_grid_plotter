@@ -13,6 +13,7 @@ flake8-html
 ruff
 
 # doc
+docutils<0.21  # because of compatibility issue with nbsphinx-link
 nbsphinx
 nbsphinx-link
 sphinx<=7.3.6 # jupyter_sphinx requires sphinx>=2
