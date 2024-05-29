@@ -15,6 +15,7 @@ from dateutil.relativedelta import relativedelta
 from matplotlib.axes import Axes
 from typing_extensions import Literal
 
+NDArrayFloat = np.typing.NDArray[np.float64]
 # pylint: disable=C0103 # does not confrom to snake case naming style
 # pylint: disable=R0913 # too many arguments
 # pylint: disable=R0914 # too many local variables
@@ -377,9 +378,51 @@ def align_y_axes(axes: List[Axes], is_ticks_major: bool = True) -> List[Any]:
     return _align_axes(axes, is_ticks_major, True)
 
 
+def _find_new_ticks(
+    new_ticks: List[NDArrayFloat],
+    bounds: Sequence[Tuple[float, float]],
+    n_ax: int,
+) -> List[NDArrayFloat]:
+    # find the lower bound
+    idx_lb = 0
+    for i in range(len(new_ticks[0])):
+        if any((new_ticks[jj][i] > bounds[jj][0] for jj in range(n_ax))):
+            idx_lb = i - 1
+            break
+
+    # find the upper bound
+    idx_ub = 0
+    for i in range(len(new_ticks[0])):
+        if all((new_ticks[jj][i] > bounds[jj][1] for jj in range(n_ax))):
+            idx_ub = i
+            break
+
+    return [tii[idx_lb : idx_ub + 1] for tii in new_ticks]
+
+
+def align_and_set_new_ticks(
+    axes: List[Axes],
+    new_ticks: List[NDArrayFloat],
+    bounds: Sequence[Tuple[float, float]],
+    n_ax: int,
+    is_y_axis: bool,
+) -> List[NDArrayFloat]:
+    # find the lower and uppers bounds
+    new_ticks = _find_new_ticks(new_ticks, bounds, n_ax)
+
+    # set ticks for each axis
+    for axii, tii in zip(axes, new_ticks):
+        if is_y_axis:
+            axii.set_yticks(tii)
+        else:
+            axii.set_xticks(tii)
+
+    return new_ticks
+
+
 def _align_axes(
     axes: List[Axes], is_ticks_major: bool = True, is_y_axis: bool = True
-) -> List[Any]:
+) -> List[NDArrayFloat]:
     """
     Align the ticks of multiple y axes.
 
@@ -419,32 +462,7 @@ def _align_axes(
         )
         for ii in range(n_ax)
     ]
-
-    # find the lower bound
-    idx_l = 0
-    for i in range(len(new_ticks[0])):
-        if any((new_ticks[jj][i] > bounds[jj][0] for jj in range(n_ax))):
-            idx_l = i - 1
-            break
-
-    # find the upper bound
-    idx_r = 0
-    for i in range(len(new_ticks[0])):
-        if all((new_ticks[jj][i] > bounds[jj][1] for jj in range(n_ax))):
-            idx_r = i
-            break
-
-    # trim tick lists by bounds
-    new_ticks = [tii[idx_l : idx_r + 1] for tii in new_ticks]
-
-    # set ticks for each axis
-    for axii, tii in zip(axes, new_ticks):
-        if is_y_axis:
-            axii.set_yticks(tii)
-        else:
-            axii.set_xticks(tii)
-
-    return new_ticks
+    return align_and_set_new_ticks(axes, new_ticks, bounds, n_ax, is_y_axis)
 
 
 def align_x_axes_on_values(
@@ -518,7 +536,7 @@ def _align_axes_on_values(
     is_y_axis: bool = True,
     align_values: Optional[List[float]] = None,
     is_ticks_major: bool = True,
-) -> List[Any]:
+) -> List[NDArrayFloat]:
     """
     Align the ticks of multiple axes.
 
@@ -586,31 +604,7 @@ def _align_axes_on_values(
     new_ticks = [new_ticks / 10.0 ** igs[ii] for ii in range(n_ax)]
     new_ticks = [new_ticks[ii] + aligns[ii] for ii in range(n_ax)]
 
-    # find the lower bound
-    idx_l = 0
-    for i in range(len(new_ticks[0])):
-        if any((new_ticks[jj][i] > bounds[jj][0] for jj in range(n_ax))):
-            idx_l = i - 1
-            break
-
-    # find the upper bound
-    idx_r = 0
-    for i in range(len(new_ticks[0])):
-        if all((new_ticks[jj][i] > bounds[jj][1] for jj in range(n_ax))):
-            idx_r = i
-            break
-
-    # trim tick lists by bounds
-    new_ticks = [tii[idx_l : idx_r + 1] for tii in new_ticks]
-
-    # set ticks for each axis
-    for axii, tii in zip(axes, new_ticks):
-        if is_y_axis:
-            axii.set_yticks(tii)
-        else:
-            axii.set_xticks(tii)
-
-    return new_ticks
+    return align_and_set_new_ticks(axes, new_ticks, bounds, n_ax, is_y_axis)
 
 
 def make_x_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
@@ -662,11 +656,12 @@ def add_xaxis_twin_as_date(
     time_format: str = "%d-%m-%Y",
     spine_outward_position: float = 48.0,
     date_rotation: float = 15.0,
+    position: Literal["top", "bottom"] = "bottom",
 ) -> Axes:
     """
     Add dates to an already existing axis.
 
-    The dates are creating frm a first day axis (numbered from x to n),
+    The dates are creating from a first day axis (numbered from x to n),
     taking the time series first date as the starting date.
 
     Parameters
@@ -724,9 +719,12 @@ def add_xaxis_twin_as_date(
     ax2.set_xbound(ax.get_xbound())
     ax2.set_xticklabels(ax2_xticklabels)
 
-    ax.xaxis.set_ticks_position("bottom")
-    ax2.xaxis.set_ticks_position("bottom")
-    ax2.spines["bottom"].set_position(("outward", spine_outward_position))
+    # ax.xaxis.set_ticks_position(position)
+    ax2.xaxis.set_ticks_position(position)
+
+    # Apply a shift
+    if position == "bottom":
+        ax2.spines[position].set_position(("outward", spine_outward_position))
 
     for tick in ax2.get_xticklabels():
         tick.set_rotation(date_rotation)
