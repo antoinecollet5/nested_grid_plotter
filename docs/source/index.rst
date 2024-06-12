@@ -8,10 +8,10 @@ Welcome to Nested Grid Plotter's documentation!
 
    installation
    user_guide
-   contributing
-   authors
-   changelog
    api_reference
+   contributing
+   changelog
+   authors
 
 Indices and tables
 ==================
