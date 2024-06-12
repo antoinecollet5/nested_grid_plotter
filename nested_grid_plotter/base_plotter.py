@@ -73,34 +73,35 @@ class NestedGridPlotter:
 
         Example
         -------
+        .. code-block:: python
 
-        subplots_mosaic_params = {
-            "unique": dict(
-                mosaic = [
-                    ["ax11", "ax12", "ax13", "ax14"],
-                    ["ax21", "ax22", "ax23", "ax24"],
-                    ["ax31", "ax32", "ax33", "ax34"]
-                ],
-                sharey = True,
-                sharex = True
-                )
-            }
-
-        plotter = NestedGridPlotter(
-            fig_params={"constrained_layout": True, "figsize": (18, 14)},
-            subplots_mosaic_params={
-                "fig0": dict(
-                    mosaic=[
-                        ["ax1-1", "ax1-2"],
-                        ["ax2-1", "ax2-2"],
-                        ["ax3-1", "ax3-2"],
-                        ["ax4-1", "ax4-2"],
+            subplots_mosaic_params = {
+                "unique": dict(
+                    mosaic = [
+                        ["ax11", "ax12", "ax13", "ax14"],
+                        ["ax21", "ax22", "ax23", "ax24"],
+                        ["ax31", "ax32", "ax33", "ax34"]
                     ],
-                    sharey=False,
-                    sharex=True,
-                )
-            },
-        )
+                    sharey = True,
+                    sharex = True
+                    )
+                }
+
+            plotter = NestedGridPlotter(
+                fig_params={"constrained_layout": True, "figsize": (18, 14)},
+                subplots_mosaic_params={
+                    "fig0": dict(
+                        mosaic=[
+                            ["ax1-1", "ax1-2"],
+                            ["ax2-1", "ax2-2"],
+                            ["ax3-1", "ax3-2"],
+                            ["ax4-1", "ax4-2"],
+                        ],
+                        sharey=False,
+                        sharex=True,
+                    )
+                },
+            )
         """
         fig_params = {} if fig_params is None else fig_params
         subfigs_params = {} if subfigs_params is None else subfigs_params
