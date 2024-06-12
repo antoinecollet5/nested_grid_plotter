@@ -23,6 +23,8 @@ Utility Functions
    :toctree: _autosummary
 
     add_grid_and_tick_prams_to_axis
+    ticklabels_to_datetime
+    add_twin_axis_as_datetime
     add_xaxis_twin_as_date
     align_x_axes
     align_y_axes
@@ -56,6 +58,7 @@ from nested_grid_plotter.imshow import multi_imshow
 from nested_grid_plotter.utils import (
     add_grid_and_tick_prams_to_axis,
     add_letter_to_frames,
+    add_twin_axis_as_datetime,
     add_xaxis_twin_as_date,
     align_x_axes,
     align_x_axes_on_values,
@@ -70,6 +73,7 @@ from nested_grid_plotter.utils import (
     make_x_axes_symmetric_zero_centered,
     make_y_axes_symmetric_zero_centered,
     replace_bad_path_characters,
+    ticklabels_to_datetime,
 )
 
 __all__ = [
@@ -92,6 +96,8 @@ __all__ = [
     "align_y_axes_on_values",
     "make_x_axes_symmetric_zero_centered",
     "make_y_axes_symmetric_zero_centered",
+    "ticklabels_to_datetime",
+    "add_twin_axis_as_datetime",
     "add_xaxis_twin_as_date",
     "multi_imshow",
     "add_letter_to_frames",

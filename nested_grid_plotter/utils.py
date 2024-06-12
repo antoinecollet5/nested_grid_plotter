@@ -5,7 +5,7 @@ Utilities for matplotlib.
 import base64
 import re
 import string
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, List, Optional, Sequence, Tuple, Union
 
@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from matplotlib.axes import Axes
+from matplotlib.axes._base import _AxesBase
 from typing_extensions import Literal
 
 NDArrayFloat = np.typing.NDArray[np.float64]
@@ -649,6 +650,156 @@ def make_y_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
         ax.set_ylim([-max_lims[i], max_lims[i]])
 
 
+def ticklabels_to_datetime(
+    ax: _AxesBase,
+    initial_datetime: datetime,
+    is_y_axis: bool,
+    step: relativedelta,
+    format: str = "%d-%m-%Y",
+    rotation_degrees: float = 15.0,
+) -> None:
+    """
+    Convert float ticklabels to datetime.
+
+    .. versionadded:: 1.2
+
+    Parameters
+    ----------
+    ax: Axes
+        The axis for which the transformation is applied.
+    initial_datetime : datetime
+        Date associated with the first data point.
+    is_y_axis : bool
+        Whether to apply the transformation to the y axis.
+    initial_datetime : datetime
+        Date associated with the first data point.
+    step: relativedelta
+        Unit of time between two data points. The default is "days".
+    format : str, optional
+        Time format for display. The default is "%d-%m-%Y".
+    rotation_degrees : float, optional
+        Rotation angle in degrees to apply to ticks labels
+        (in degrees, counterclockwise). The default is 15.0.
+    """
+
+    # Compute the datetimes
+    def _get_ticks():
+        if is_y_axis:
+            return ax.get_yticks()
+        return ax.get_xticks()
+
+    ticklabels = [
+        (initial_datetime + step * tl).strftime(format) for tl in _get_ticks()
+    ]
+
+    # Set the new labels
+    if is_y_axis:
+        # it has a tendency to change the axis limits so we artificially maintain it
+        lims = ax.get_ylim()
+        # fix the ticks before using setticklabels otherwise a warning is raised
+        ax.set_yticks(ax.get_yticks())
+        ax.set_yticklabels(ticklabels)
+        ax.set_ylim(lims)
+    else:
+        lims = ax.get_xlim()
+        ax.set_xticks(ax.get_xticks())
+        ax.set_xticklabels(ticklabels)
+        ax.set_xlim(lims)
+
+    # Rotate the labels to avoid overlapping
+
+    def _get_ticklabels():
+        if is_y_axis:
+            return ax.get_yticklabels()
+        return ax.get_xticklabels()
+
+    for tick in _get_ticklabels():
+        if rotation_degrees < 0:
+            rotation_degrees += 360
+        tick.set_rotation(rotation_degrees)
+
+
+def add_twin_axis_as_datetime(
+    ax: _AxesBase,
+    initial_datetime: datetime,
+    step: relativedelta,
+    format: str = "%d-%m-%Y",
+    rotation_degrees: float = 15.0,
+    spine_outward_position: float = 48.0,
+    position: Literal["top", "bottom", "left", "right"] = "bottom",
+    is_hide_opposed_tick_labels: bool = True,
+) -> _AxesBase:
+    """
+    Add dates to an already existing axis.
+
+    .. versionadded:: 1.2
+
+    The dates are creating from a first day axis (numbered from x to n),
+    taking the time series first date as the starting date.
+
+    Parameters
+    ----------
+    ax: Axes
+        The axis for which to add a twin xaxis.
+    initial_datetime : datetime
+        Date associated with the first data point.
+    step: relativedelta
+        Unit of time between two data points. The default is "days".
+    format : str, optional
+        Time format for display. The default is "%d-%m-%Y".
+    rotation_degrees : float, optional
+        Rotation angle in degrees to apply to ticks labels
+        (in degrees, counterclockwise). The default is 15.0.
+    spine_outward_position : float, optional
+        The spine is placed out from the data area by the specified number of points
+        (Negative values place the spine inwards). The default is 48.0.
+    position: Literal["top", "bottom", "left", "right"]
+        Position of the new axis.
+
+    Returns
+    -------
+    Axes
+        The created date xaxis.
+
+    """
+    is_y_axis: bool = {"top": False, "bottom": False, "left": True, "right": True}[
+        position
+    ]
+
+    # Creation of a second x or y axis
+    if is_y_axis:
+        ax2: _AxesBase = ax.twinx()
+    else:
+        ax2 = ax.twiny()
+
+    # Impose the same ticks
+    if is_y_axis:
+        ax2.set_yticks(ax.get_yticks())
+        ax2.set_ybound(*ax.get_ybound())
+    else:
+        ax2.set_xticks(ax.get_xticks())
+        ax2.set_xbound(*ax.get_xbound())
+
+    if is_y_axis:
+        ax2.yaxis.set_ticks_position(position)
+    else:
+        ax2.xaxis.set_ticks_position(position)
+
+    # Apply a shift
+    ax2.spines[position].set_position(("outward", spine_outward_position))
+
+    ticklabels_to_datetime(
+        ax2,
+        initial_datetime,
+        is_y_axis,
+        step,
+        format,
+        rotation_degrees,
+    )
+
+    return ax2
+
+
 def add_xaxis_twin_as_date(
     ax: Axes,
     first_date: datetime,
@@ -660,6 +811,9 @@ def add_xaxis_twin_as_date(
 ) -> Axes:
     """
     Add dates to an already existing axis.
+
+    .. deprecated:: 1.2
+        Use :func:`add_twin_axis_as_datetime` instead.
 
     The dates are creating from a first day axis (numbered from x to n),
     taking the time series first date as the starting date.
@@ -687,49 +841,10 @@ def add_xaxis_twin_as_date(
         The created date xaxis.
 
     """
-    # Creation of a second x axis
-    ax2: Axes = ax.twiny()
-
-    # Get the values at the ticks in the first x axis
-    ax1_xticks = ax.get_xticks()
-    # Create an empty list of the future ticks for the second x-axis
-    ax2_xticklabels = []
-    # Fill the list
-    if time_units in ["days", "d"]:
-        for value in ax1_xticks:
-            ax2_xticklabels.append(
-                (first_date + timedelta(days=float(value))).strftime(time_format)
-            )
-    elif time_units in ["months", "m"]:
-        for value in ax1_xticks:
-            ax2_xticklabels.append(
-                (first_date + relativedelta(months=int(value))).strftime(time_format)
-            )
-    elif time_units in ["years", "y"]:
-        for value in ax1_xticks:
-            ax2_xticklabels.append(
-                (first_date + relativedelta(years=int(value))).strftime(time_format)
-            )
-    else:
-        raise ValueError(
-            r"time_units should be in ['days', 'd', 'months', 'm', 'years', 'y']"
-        )
-
-    ax2.set_xticks(ax1_xticks)
-    ax2.set_xbound(ax.get_xbound())
-    ax2.set_xticklabels(ax2_xticklabels)
-
-    # ax.xaxis.set_ticks_position(position)
-    ax2.xaxis.set_ticks_position(position)
-
-    # Apply a shift
-    if position == "bottom":
-        ax2.spines[position].set_position(("outward", spine_outward_position))
-
-    for tick in ax2.get_xticklabels():
-        tick.set_rotation(date_rotation)
-
-    return ax2
+    raise NotImplementedError(
+        '"add_xaxis_twin_as_date" was removed in '
+        'version 1.2, use "add_twin_axis_as_datetime" instead!'
+    )
 
 
 def add_letter_to_frames(axes: Sequence[Axes]) -> None:

@@ -2,6 +2,14 @@
 Changelog
 ==============
 
+1.2.0 (2024-06-13)
+------------------
+
+* IMP: `add_xaxis_twin_as_date` is now deprecated and replaced by the more
+  flexible `ticklabels_to_datetime` and `add_twin_axis_as_datetime`
+  functions. The tutorials and tests have been updated.
+
+
 1.1.2 (2024-04-27)
 ------------------
 

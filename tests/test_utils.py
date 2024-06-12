@@ -7,7 +7,6 @@ follow the same order.
 @author: Antoine COLLET
 """
 
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -16,6 +15,7 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from dateutil.relativedelta import relativedelta
 from matplotlib.animation import HTMLWriter
 from matplotlib.axes import Axes  # Just for liting
 
@@ -484,67 +484,108 @@ def test_add_xaxis_twin_as_date() -> None:
     ax1.set_xlabel("Number of days")
 
     # Add a date x axis
-    ngp.add_xaxis_twin_as_date(
-        ax1,
-        first_date=datetime(2022, 1, 6),
-        time_units="days",
-        time_format="%d-%m-%Y",
-        spine_outward_position=38,
-    )
+    with pytest.raises(
+        NotImplementedError,
+        match=r"\"add_xaxis_twin_as_date\" was removed in version 1.2, use \"add_twin_axis_as_datetime\" instead!",
+    ):
+        ngp.add_xaxis_twin_as_date(
+            ax1,
+            first_date=datetime(2022, 1, 6),
+            time_units="days",
+            time_format="%d-%m-%Y",
+            spine_outward_position=38,
+        )
 
-    # Add a date x axis
-    ngp.add_xaxis_twin_as_date(
-        ax1,
-        first_date=datetime(2022, 1, 6),
-        time_units="days",
-        time_format="%m-%Y",
-        spine_outward_position=78,
+
+@pytest.mark.parametrize("is_y_axis", ((True,), (False,)))
+def ticklabels_to_datetime(is_y_axis: bool) -> None:
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (15, 5)},
+        subplots_mosaic_params={"fig0": dict(mosaic=[["ax1-1", "ax1-2", "ax1-3"]])},
     )
 
     # Plot the data
-    ax2: Axes = plotter.ax_dict["ax1-2"]
+    ax1 = plotter.ax_dict["ax1-1"]
+    ax1.plot(np.cumsum(0.004 + 0.04 * np.random.randn(100, 5)))
+    ax1.set_title("A timeseries with daily data")
+
+    # You can either transform the existing axis
+    ngp.ticklabels_to_datetime(
+        ax1,
+        initial_datetime=datetime(2022, 1, 6),
+        is_y_axis=is_y_axis,
+        step=relativedelta(days=1),
+        format="%d-%m-%Y",
+        rotation_degrees=15,
+    )
+
+
+@pytest.mark.parametrize("position", (("top"), ("bottom"), ("left"), ("right")))
+def test_add_twin_axis_as_datetime(position) -> None:
+    plotter = ngp.NestedGridPlotter(
+        fig_params={"constrained_layout": True, "figsize": (15, 5)},
+        subplots_mosaic_params={"fig0": dict(mosaic=[["ax1-1", "ax1-2", "ax1-3"]])},
+    )
+
+    # Plot the data
+    ax1 = plotter.ax_dict["ax1-1"]
+    ax1.plot(np.cumsum(0.004 + 0.04 * np.random.randn(100, 5)))
+    ax1.set_title("A timeseries with daily data")
+
+    # Add a second one
+    ngp.add_twin_axis_as_datetime(
+        ax1,
+        initial_datetime=datetime(2022, 1, 6),
+        step=relativedelta(days=1),
+        format="%d-%m-%Y",
+        rotation_degrees=-15,  # rotation the other way around
+        spine_outward_position=50,  # relative to ax11
+        position=position,
+    )
+
+    # And even a third one with a rotation
+    ngp.add_twin_axis_as_datetime(
+        ax1,
+        initial_datetime=datetime(2022, 1, 6),
+        step=relativedelta(days=1),
+        format="%d-%m",
+        spine_outward_position=90,  # relative to ax11
+        rotation_degrees=0,
+        position=position,
+    )
+
+    # Plot the data
+    ax2 = plotter.ax_dict["ax1-2"]
     ax2.plot(np.cumsum(0.004 + 0.04 * np.random.randn(10, 5)))
     ax2.set_title("A timeseries with monthly data")
     ax2.set_xlabel("Number of months")
 
-    # Add a date x axis
-    ngp.add_xaxis_twin_as_date(
+    # And on the third graphic, same with years and above the graphic
+    ngp.add_twin_axis_as_datetime(
         ax2,
-        first_date=datetime(2022, 1, 6),
-        time_units="months",
-        time_format="%m-%Y",
+        initial_datetime=datetime(2022, 1, 6),
+        step=relativedelta(months=1),
+        format="%m-%Y",
         spine_outward_position=38,
+        position=position,
     )
 
     # Plot the data
-    ax3: Axes = plotter.ax_dict["ax1-3"]
+    ax3 = plotter.ax_dict["ax1-3"]
     ax3.plot(np.cumsum(0.004 + 0.04 * np.random.randn(5, 5)))
     ax3.set_title("A timeseries with yealy data")
     ax3.set_xlabel("Number of years")
 
     # Add a date x axis
-    ax3 = ngp.add_xaxis_twin_as_date(
+    ngp.add_twin_axis_as_datetime(
         ax3,
-        first_date=datetime(2022, 1, 6),
-        time_units="years",
-        time_format="%Y",
-        spine_outward_position=38,
+        initial_datetime=datetime(2022, 1, 6),
+        step=relativedelta(years=1),
+        format="%Y",
+        spine_outward_position=0,
+        is_hide_opposed_tick_labels=False,
+        position=position,
     )
-
-    # Add a date x axis
-    with pytest.raises(
-        ValueError,
-        match=re.escape(
-            "time_units should be in ['days', 'd', 'months', 'm', 'years', 'y']"
-        ),
-    ):
-        ax3 = ngp.add_xaxis_twin_as_date(
-            ax3,
-            first_date=datetime(2022, 1, 6),
-            time_units="jours",
-            time_format="%Y",
-            spine_outward_position=38,
-        )
 
 
 def test_add_letter_to_frames_less26axes() -> None:
