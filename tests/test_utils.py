@@ -6,7 +6,7 @@ follow the same order.
 
 @author: Antoine COLLET
 """
-
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -374,7 +374,8 @@ def test_align_y_axes():
     assert axes3[2].get_yticks()[pos] == 44.0
 
 
-def test_make_x_axes_symmetric_zero_centered():
+@pytest.mark.parametrize("min_abs_lims", (None, [100, 200]))
+def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
     plotter = ngp.NestedGridPlotter(
         fig_params={"constrained_layout": True, "figsize": (15, 5)},
         subfigs_params={"ncols": 3},
@@ -413,17 +414,31 @@ def test_make_x_axes_symmetric_zero_centered():
     ax3.plot(xy, y_data, linestyle="--")
     ax3_twin.plot(x_data2, y_data, c="r", label="data2")
     ngp.make_x_axes_symmetric_zero_centered(
-        [ax3, ax3_twin]
+        [ax3, ax3_twin], min_abs_lims
     )  # Works for more than 2 axes
     ax3.set_title("Specific alignment at y=0.0, with symmetry")
 
     assert ax3.get_xlim()[0] == -ax3.get_xlim()[1]
     assert ax3_twin.get_xlim()[0] == -ax3_twin.get_xlim()[1]
 
+    if min_abs_lims is not None:
+        assert ax3.get_xlim()[1] >= min_abs_lims[0]
+        assert ax3_twin.get_xlim()[1] >= min_abs_lims[1]
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            r"The number of axes (2) and of absolute "
+            r"limits `min_abs_lims` (1) should be the same!"
+        ),
+    ):
+        ngp.make_x_axes_symmetric_zero_centered([ax3, ax3_twin], [1.0])
+
     plotter.add_fig_legend(fontsize=10, ncol=2)
 
 
-def test_make_y_axes_symmetric_zero_centered():
+@pytest.mark.parametrize("min_abs_lims", (None, [100, 200]))
+def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
     plotter = ngp.NestedGridPlotter(
         fig_params={"constrained_layout": True, "figsize": (15, 5)},
         subfigs_params={"ncols": 3},
@@ -461,12 +476,25 @@ def test_make_y_axes_symmetric_zero_centered():
     ax3.plot(xy, linestyle="--")
     ax3_twin.plot(data2, c="r", label="data2")
     ngp.make_y_axes_symmetric_zero_centered(
-        [ax3, ax3_twin]
+        [ax3, ax3_twin], min_abs_lims
     )  # Works for more than 2 axes
     ax3.set_title("Specific alignment at y=0.0, with symmetry")
 
     assert ax3.get_ylim()[0] == -ax3.get_ylim()[1]
     assert ax3_twin.get_ylim()[0] == -ax3_twin.get_ylim()[1]
+
+    if min_abs_lims is not None:
+        assert ax3.get_ylim()[1] >= min_abs_lims[0]
+        assert ax3_twin.get_ylim()[1] >= min_abs_lims[1]
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            r"The number of axes (2) and of absolute "
+            r"limits `min_abs_lims` (1) should be the same!"
+        ),
+    ):
+        ngp.make_x_axes_symmetric_zero_centered([ax3, ax3_twin], [1.0])
 
     plotter.add_fig_legend(fontsize=10, ncol=2)
 

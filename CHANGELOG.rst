@@ -2,13 +2,15 @@
 Changelog
 ==============
 
-1.2.0 (2024-06-13)
+1.2.0 (2024-06-12)
 ------------------
 
 * IMP: `add_xaxis_twin_as_date` is now deprecated and replaced by the more
   flexible `ticklabels_to_datetime` and `add_twin_axis_as_datetime`
   functions. The tutorials and tests have been updated.
-
+* IMP: `make_x_axes_symmetric_zero_centered` and
+  `make_x_axes_symmetric_zero_centered` have now possibility to ensure minimum
+  symmetric axis limits through the `min_xlims` and `min_ylims` keywords respectively.
 
 1.1.2 (2024-04-27)
 ------------------

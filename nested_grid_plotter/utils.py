@@ -608,9 +608,52 @@ def _align_axes_on_values(
     return align_and_set_new_ticks(axes, new_ticks, bounds, n_ax, is_y_axis)
 
 
-def make_x_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
+def _get_min_abs_lims(
+    axes: List[Axes], min_abs_lims: Optional[List[float]] = None
+) -> NDArrayFloat:
+    if min_abs_lims is not None:
+        if len(min_abs_lims) != len(axes):
+            raise ValueError(
+                f"The number of axes ({len(axes)}) and of absolute "
+                f"limits `min_abs_lims` ({len(min_abs_lims)}) should be the same!"
+            )
+        return np.abs(min_abs_lims)
+    return np.repeat([np.nan], len(axes))
+
+
+def _make_axes_symmetric_zero_centered(
+    axes: List[Axes], is_yaxis: bool, min_abs_lims: Optional[List[float]] = None
+) -> None:
+    _min_abs_lims = _get_min_abs_lims(axes, min_abs_lims)
+
+    def get_lim(ax: Axes) -> Tuple[float, float]:
+        if is_yaxis:
+            return ax.get_ylim()
+        return ax.get_xlim()
+
+    max_lims: NDArrayFloat = np.nanmax(
+        [
+            np.max(np.abs(np.array([get_lim(ax) for ax in axes])), axis=1),
+            _min_abs_lims,
+        ],
+        axis=0,
+    )
+
+    def set_symlim(ax: Axes, lim: float) -> None:
+        if is_yaxis:
+            ax.set_ylim(-lim, lim)
+        else:
+            ax.set_xlim(-lim, lim)
+
+    for i, ax in enumerate(axes):
+        set_symlim(ax, max_lims[i])
+
+
+def make_x_axes_symmetric_zero_centered(
+    axes: List[Axes], min_xlims: Optional[List[float]] = None
+) -> None:
     """
-    Make all given x axes symmetric in zero.
+    Make x-axis symmetric in zero for all provided axes
 
     Always put 0 in the middle of the graph for all x axes.
 
@@ -618,20 +661,29 @@ def make_x_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
     ----------
     axes : List[Axes]
         List of axes to adjust.
+    min_xlims: Optional[List[float]]
+
+        .. versionadded:: 1.2
+
+        Minimum xlim for each axis. If data range from -2.0 to 5.0, and `min_xlims` is
+        1.0, then the limits would be [-5.0, 5.0], but if `min_xlims` is 10.0 or
+        -10.0, then, the limits would be [-10.0, 10.0]. If None, then it is ignored.
+        The provided list should have the same number of elements as `axes`.
+        By default None.
 
     Returns
     -------
     None.
 
     """
-    max_lims = np.max(np.abs(np.array([ax.get_xlim() for ax in axes])), axis=1)
-    for i, ax in enumerate(axes):
-        ax.set_xlim([-max_lims[i], max_lims[i]])
+    _make_axes_symmetric_zero_centered(axes, False, min_xlims)
 
 
-def make_y_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
+def make_y_axes_symmetric_zero_centered(
+    axes: List[Axes], min_ylims: Optional[List[float]] = None
+) -> None:
     """
-    Make all given y axes symmetric in zero.
+    Make y-axis symmetric in zero for all provided axes.
 
     Always put 0 in the middle of the graph for all y axes.
 
@@ -639,15 +691,22 @@ def make_y_axes_symmetric_zero_centered(axes: List[Axes]) -> None:
     ----------
     axes : List[Axes]
         List of axes to adjust.
+    min_ylims: Optional[List[float]]
+
+        .. versionadded:: 1.2
+
+        Minimum ylim for each axis. If data range from -2.0 to 5.0, and `min_ylims` is
+        1.0, then the limits would be [-5.0, 5.0], but if `min_ylims` is 10.0 or
+        -10.0, then, the limits would be [-10.0, 10.0]. The provided list should have
+        the same number of elements as `axes`. If None, then it is ignored.
+        By default None.
 
     Returns
     -------
     None.
 
     """
-    max_lims = np.max(np.abs(np.array([ax.get_ylim() for ax in axes])), axis=1)
-    for i, ax in enumerate(axes):
-        ax.set_ylim([-max_lims[i], max_lims[i]])
+    _make_axes_symmetric_zero_centered(axes, True, min_ylims)
 
 
 def ticklabels_to_datetime(
