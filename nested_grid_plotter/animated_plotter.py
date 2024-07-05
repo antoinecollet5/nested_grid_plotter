@@ -14,7 +14,7 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
-from nested_grid_plotter.base_plotter import NestedGridPlotter
+from nested_grid_plotter.base_plotter import NestedBuilder, NestedGridPlotter
 from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
@@ -72,9 +72,8 @@ class AnimatedPlotter(NestedGridPlotter):
 
     def __init__(
         self,
-        fig_params: Optional[Dict[str, Any]] = None,
-        subfigs_params: Optional[Dict[str, Any]] = None,
-        subplots_mosaic_params: Optional[Dict[str, Any]] = None,
+        fig: Optional[Figure] = None,
+        builder: Optional[NestedBuilder] = None,
     ) -> None:
         """
         Initiate the instance.
@@ -93,11 +92,7 @@ class AnimatedPlotter(NestedGridPlotter):
         -------
         None
         """
-        _fig_params = dict(constrained_layout=True)
-        if fig_params is not None:
-            _fig_params.update(fig_params)
-
-        super().__init__(_fig_params, subfigs_params, subplots_mosaic_params)
+        super().__init__(fig, builder)
         # self.fig.patch.set_facecolor("w")
         self.init_animations_list: List[Callable] = []
         self.animations_list: List[Callable] = []

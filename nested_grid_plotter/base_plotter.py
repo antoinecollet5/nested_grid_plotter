@@ -44,7 +44,7 @@ class NestedBuilder(abc.ABC):
     ) -> None: ...
 
 
-class SubplotMosaicBuilder(NestedBuilder):
+class SubplotsMosaicBuilder(NestedBuilder):
     """Args and kwargs for Figure.subfigures routine."""
 
     def __init__(
@@ -370,7 +370,7 @@ class NestedGridPlotter:
 
         # build subfigures and mosaic
         if builder is None:
-            builder = SubplotMosaicBuilder([["ax1-1"]])
+            builder = SubplotsMosaicBuilder([["ax1-1"]])
         builder(self.fig, "fig", self.grouped_sf_dict, self.grouped_ax_dict)
 
         self._check_if_subplot_names_are_unique()

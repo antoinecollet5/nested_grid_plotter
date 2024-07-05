@@ -17,7 +17,6 @@ import pytest
 from matplotlib import colors
 from matplotlib.axes import Axes  # Just for liting
 from matplotlib.figure import Figure
-
 from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,

@@ -94,7 +94,7 @@ def test_unique_subfig_with_mosaic():
         ngp.Figure(constrained_layout=True),
         builder=ngp.SubfigsBuilder(
             sub_builders={
-                "my_subfigure_name": ngp.SubplotMosaicBuilder(
+                "my_subfigure_name": ngp.SubplotsMosaicBuilder(
                     mosaic=[["ax1-1", "ax1-2", "ax1-3"], ["ax2-1", "ax2-2", "ax2-3"]]
                 ),
             }
@@ -129,12 +129,12 @@ def test_multiple_subfigs_1_row_with_mosaic():
             nrows=1,
             ncols=2,
             sub_builders={
-                "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["lt1", "lt1"], ["lb1", "rb1"]],
                     gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
                     sharey=False,
                 ),
-                "the_right_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["l2", "rt2"], ["l2", "rb2"]],
                     gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
                     sharey=False,
@@ -179,16 +179,16 @@ def test_multiple_subfigs_2_rows_with_mosaic():
             nrows=2,
             ncols=2,
             sub_builders={
-                "the_top_left_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_top_left_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["ax1"], ["ax2"]]
                 ),
-                "the_top_right_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_top_right_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["ax3"], ["ax4"]]
                 ),
-                "the_bottom_left_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_bottom_left_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["ax5"], ["ax6"]]
                 ),
-                "the_bottom_right_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_bottom_right_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["ax7"], ["ax8"]]
                 ),
             },
@@ -242,7 +242,7 @@ def test_less_keys_in_subplots_mosaic_params_than_subfigs():
                 nrows=1,
                 ncols=2,
                 sub_builders={
-                    "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["t-left", "t-left"], ["b-left", "b-right"]],
                     ),
                 },
@@ -258,13 +258,13 @@ def test_error_more_keys_in_subplots_mosaic_params_than_subfigs():
                 nrows=1,
                 ncols=2,
                 sub_builders={
-                    "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["tl1", "tl1"], ["bl1", "br1"]],
                     ),
-                    "the_center_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_center_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["tl2", "tl2"], ["bl2", "br2"]],
                     ),
-                    "the_right_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["tl3", "tl3"], ["bl3", "br3"]],
                     ),
                 },
@@ -280,10 +280,10 @@ def test_error_same_axis_names_used_in_multiple_subfigures():
                 nrows=1,
                 ncols=2,
                 sub_builders={
-                    "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["ax11", "ax11"], ["ax12", "ax13"]],
                     ),
-                    "the_right_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["ax12", "ax11"], ["ax12", "ax13"]],
                     ),
                 },
@@ -298,10 +298,10 @@ def test_error_same_axis_names_used_in_multiple_subfigures():
                 nrows=1,
                 ncols=2,
                 sub_builders={
-                    "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["ax11", "ax11"]],
                     ),
-                    "the_right_sub_figure": ngp.SubplotMosaicBuilder(
+                    "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
                         mosaic=[["ax12", "ax11"]],
                     ),
                 },
@@ -414,7 +414,7 @@ def gen_complex_example_fig() -> ngp.NestedGridPlotter:
             nrows=1,
             ncols=2,
             sub_builders={
-                "the_left_sub_figure": ngp.SubplotMosaicBuilder(
+                "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
                     mosaic=[["lt1", "lt1"], ["lb1", "rb1"]],
                     gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
                     sharey=False,
@@ -424,10 +424,10 @@ def gen_complex_example_fig() -> ngp.NestedGridPlotter:
                     ncols=2,
                     width_ratios=[2, 1],
                     sub_builders={
-                        "the_right_left_sub_figure": ngp.SubplotMosaicBuilder(
+                        "the_right_left_sub_figure": ngp.SubplotsMosaicBuilder(
                             mosaic=[["l2"]],
                         ),
-                        "the_right_right_sub_figure": ngp.SubplotMosaicBuilder(
+                        "the_right_right_sub_figure": ngp.SubplotsMosaicBuilder(
                             mosaic=[["rt2"], ["rb2"]],
                             gridspec_kw=dict(height_ratios=[2, 1]),
                             sharey=False,

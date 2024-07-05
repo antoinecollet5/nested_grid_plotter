@@ -14,7 +14,7 @@ Classes
    :toctree: _autosummary
 
     SubfigsBuilder
-    SubplotMosaicBuilder
+    SubplotsMosaicBuilder
     NestedGridPlotter
     AnimatedPlotter
 
@@ -60,7 +60,7 @@ from nested_grid_plotter.animated_plotter import AnimatedPlotter
 from nested_grid_plotter.base_plotter import (
     NestedGridPlotter,
     SubfigsBuilder,
-    SubplotMosaicBuilder,
+    SubplotsMosaicBuilder,
 )
 from nested_grid_plotter.imshow import multi_imshow
 from nested_grid_plotter.utils import (
@@ -89,7 +89,7 @@ __all__ = [
     "__name__",
     "__author__",
     "Figure",
-    "SubplotMosaicBuilder",
+    "SubplotsMosaicBuilder",
     "SubfigsBuilder",
     "NestedGridPlotter",
     "AnimatedPlotter",

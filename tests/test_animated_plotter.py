@@ -1,5 +1,5 @@
 """
-Test the AnimatedPlotter class.
+Test the ngp.AnimatedPlotter class.
 
 Note that the tests are very similar to the examples found in the tutorial and
 follow the same order.
@@ -13,14 +13,14 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator, List, Optional
 
+import nested_grid_plotter as ngp
 import numpy as np
 import pytest
 from matplotlib import colors
 from matplotlib.animation import HTMLWriter
 from matplotlib.figure import Figure
 from matplotlib.text import Text
-
-from nested_grid_plotter.animated_plotter import AnimatedPlotter, _get_nb_frames
+from nested_grid_plotter.animated_plotter import _get_nb_frames
 
 # turns all warnings into errors for this module
 # pytestmark = pytest.mark.filterwarnings("error")
@@ -60,28 +60,28 @@ def tmp_folder(tmp_path_factory) -> Path:
 )
 def test_get_nb_frames(
     nb_frames: Optional[int], nb_steps: int, expected_value: int, expected_exception
-) -> int:
+) -> None:
     with expected_exception:
         assert _get_nb_frames(nb_frames, nb_steps) == expected_value
 
 
-def make_2_frames_plotter() -> AnimatedPlotter:
-    return AnimatedPlotter(
-        fig_params={"figsize": (10, 5)},
-        subplots_mosaic_params={
-            "fig0": dict(mosaic=[["ax11", "ax12"]], sharey=True, sharex=True)
-        },
+def make_2_frames_plotter() -> ngp.AnimatedPlotter:
+    return ngp.AnimatedPlotter(
+        ngp.Figure(figsize=(10, 5)),
+        builder=ngp.SubplotsMosaicBuilder(
+            mosaic=[["ax11", "ax12"]], sharey=True, sharex=True
+        ),
     )
 
 
-def test_init() -> AnimatedPlotter:
-    return AnimatedPlotter()
+def test_init() -> ngp.AnimatedPlotter:
+    return ngp.AnimatedPlotter()
 
 
 def test_no_animation() -> None:
     """Test the case when no animation has been defined."""
     with pytest.raises(AttributeError, match=r"No animation as been defined !"):
-        AnimatedPlotter().animation
+        ngp.AnimatedPlotter().animation
 
 
 def test_animated_multi_plot(tmp_folder) -> None:
@@ -171,7 +171,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
 
     # Add title animation
     seq = [f"My fig title @ frame #{i}" for i in range(nb_frames)]
-    plotter.subfigs["fig0"].suptitle(seq[0])
+    plotter.fig.suptitle(seq[0])
 
     # Change the color, just for fun
     colors = itertools.cycle(("r", "g", "b", "c", "k", "orange"))
@@ -180,9 +180,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
     def _animate(frame: int) -> List[Text]:
         """Update the text value."""
         # txt.set_text(seq[frame])  # -> to change the text of the title only
-        txt: Text = plotter.subfigs["fig0"].suptitle(
-            seq[0], fontsize=20, color=next(colors)
-        )
+        txt: Text = plotter.fig.suptitle(seq[0], fontsize=20, color=next(colors))
         return [
             txt,
         ]
@@ -202,7 +200,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
 
 
 def test_multi_plot_x_vector_exception() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -218,7 +216,7 @@ def test_multi_plot_x_vector_exception() -> None:
 
 
 def test_multi_plot_nb_steps_exception() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -236,7 +234,7 @@ def test_multi_plot_nb_steps_exception() -> None:
 
 
 def test_1D_exceptions_3() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -254,7 +252,7 @@ def test_1D_exceptions_3() -> None:
 
 
 def test_1D_exceptions_4() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -272,7 +270,7 @@ def test_1D_exceptions_4() -> None:
 
 
 def test_1D_exceptions_5() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -290,7 +288,7 @@ def test_1D_exceptions_5() -> None:
 
 
 def test_1D_exceptions_6() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,

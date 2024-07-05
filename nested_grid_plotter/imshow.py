@@ -18,7 +18,7 @@ from matplotlib.image import AxesImage
 
 
 def _apply_default_imshow_kwargs(
-    imshow_kwargs: Optional[Dict[str, Any]]
+    imshow_kwargs: Optional[Dict[str, Any]],
 ) -> Dict[str, Any]:
     """Apply default values to the given imshow kwargs dictionary."""
     _imshow_kwargs: dict[str, Any] = {

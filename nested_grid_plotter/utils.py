@@ -5,21 +5,34 @@ Utilities for matplotlib.
 import base64
 import re
 import string
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 from dateutil.relativedelta import relativedelta
 from matplotlib.axes import Axes
 from matplotlib.axes._base import _AxesBase
 from typing_extensions import Literal
 
-NDArrayFloat = np.typing.NDArray[np.float64]
+NDArrayFloat = npt.NDArray[np.float_]
 # pylint: disable=C0103 # does not confrom to snake case naming style
 # pylint: disable=R0913 # too many arguments
 # pylint: disable=R0914 # too many local variables
+
+_Object = TypeVar("_Object", bound=object)
+
+
+def object_or_object_sequence_to_list(
+    _input: Union[_Object, Sequence[_Object]],
+) -> List[_Object]:
+    """Convert a singleton or an iterable of this object to a list of object."""
+    if isinstance(_input, Iterable):
+        return [item for item in _input]
+    return [_input]
 
 
 def get_line_style(line_style_label: str) -> Tuple[float, Tuple[float]]:
@@ -622,9 +635,17 @@ def _get_min_abs_lims(
 
 
 def _make_axes_symmetric_zero_centered(
-    axes: List[Axes], is_yaxis: bool, min_abs_lims: Optional[List[float]] = None
+    axes: Union[Axes, List[Axes]],
+    is_yaxis: bool,
+    min_abs_lims: Optional[Union[float, List[float]]] = None,
 ) -> None:
-    _min_abs_lims = _get_min_abs_lims(axes, min_abs_lims)
+    _axes = object_or_object_sequence_to_list(axes)
+    _min_abs_lims = _get_min_abs_lims(
+        _axes,
+        object_or_object_sequence_to_list(min_abs_lims)
+        if min_abs_lims is not None
+        else None,
+    )
 
     def get_lim(ax: Axes) -> Tuple[float, float]:
         if is_yaxis:
@@ -633,7 +654,7 @@ def _make_axes_symmetric_zero_centered(
 
     max_lims: NDArrayFloat = np.nanmax(
         [
-            np.max(np.abs(np.array([get_lim(ax) for ax in axes])), axis=1),
+            np.max(np.abs(np.array([get_lim(ax) for ax in _axes])), axis=1),
             _min_abs_lims,
         ],
         axis=0,
@@ -645,12 +666,12 @@ def _make_axes_symmetric_zero_centered(
         else:
             ax.set_xlim(-lim, lim)
 
-    for i, ax in enumerate(axes):
+    for i, ax in enumerate(_axes):
         set_symlim(ax, max_lims[i])
 
 
 def make_x_axes_symmetric_zero_centered(
-    axes: List[Axes], min_xlims: Optional[List[float]] = None
+    axes: Union[Axes, List[Axes]], min_xlims: Optional[Union[float, List[float]]] = None
 ) -> None:
     """
     Make x-axis symmetric in zero for all provided axes
@@ -659,9 +680,9 @@ def make_x_axes_symmetric_zero_centered(
 
     Parameters
     ----------
-    axes : List[Axes]
-        List of axes to adjust.
-    min_xlims: Optional[List[float]]
+    axes : Union[Axes, List[Axes]]
+        Axis or list of axes to adjust.
+    min_xlims: Optional[Union[float, List[float]]]
 
         .. versionadded:: 1.2
 
@@ -680,7 +701,7 @@ def make_x_axes_symmetric_zero_centered(
 
 
 def make_y_axes_symmetric_zero_centered(
-    axes: List[Axes], min_ylims: Optional[List[float]] = None
+    axes: Union[Axes, List[Axes]], min_ylims: Optional[Union[float, List[float]]] = None
 ) -> None:
     """
     Make y-axis symmetric in zero for all provided axes.
@@ -689,9 +710,9 @@ def make_y_axes_symmetric_zero_centered(
 
     Parameters
     ----------
-    axes : List[Axes]
-        List of axes to adjust.
-    min_ylims: Optional[List[float]]
+    axes : Union[Axes, List[Axes]]
+        Axis or list of axes to adjust.
+    min_ylims: Optional[Union[float, List[float]]]
 
         .. versionadded:: 1.2
 
