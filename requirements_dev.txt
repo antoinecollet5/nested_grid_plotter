@@ -7,10 +7,10 @@ pytest-runner
 pytest-cov
 pytest-cookies
 nbmake
-flake8
 coverage
-flake8-html
 ruff
+pre-commit
+codespell
 
 # doc
 docutils<0.21  # because of compatibility issue with nbsphinx-link
@@ -23,11 +23,6 @@ pygments>=2.6.1
 pydata-sphinx-theme
 numpydoc
 jinja2==3.0.3
-
-pre-commit
-black~=23.1.0
-isort>=5.10.1
-codespell
 
 numpy>=1.21
 matplotlib >= 3.5.1

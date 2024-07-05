@@ -5,8 +5,8 @@ Created on Sat Feb 12 10:20:08 2022
 
 @author: acollet
 """
-import numpy as np
 
+import numpy as np
 from nested_grid_plotter import NestedGridPlotter
 
 plotter = NestedGridPlotter(

@@ -2,7 +2,7 @@
 About Nested Grid Plotter
 =========================
 
-|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: black| |Isort| |Ruff| |DOI|
+|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: Ruff| |Ruff| |DOI|
 
 NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intends to simplify the plotting of nestedgrid by providing a objected oriented class.
 
@@ -46,13 +46,9 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 .. |Precommit: enabled| image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit
    :target: https://github.com/pre-commit/pre-commit
 
-.. |Code style: black| image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
+.. |Code style: Ruff| image:: https://img.shields.io/badge/code%20style-Ruff-000000.svg?style=flat
     :target: https://github.com/psf/black
     :alt: Black
-
-.. |Isort| image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat
-    :target: https://timothycrosley.github.io/isort
-    :alt: isort
 
 .. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
     :target: https://github.com/astral-sh/ruff

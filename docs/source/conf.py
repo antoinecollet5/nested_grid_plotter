@@ -22,10 +22,9 @@ import errno
 import os
 import sys
 
+import nested_grid_plotter
 import sphinx.util.osutil
 from sphinx.ext.napoleon.docstring import GoogleDocstring
-
-import nested_grid_plotter
 
 sphinx.util.osutil.ENOENT = errno.ENOENT
 
