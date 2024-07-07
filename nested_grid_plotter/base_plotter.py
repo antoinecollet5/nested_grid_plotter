@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import abc
 import copy
+import warnings
 from collections import ChainMap
 from itertools import product
 from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
+import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.artist import Artist
@@ -21,6 +23,7 @@ from matplotlib.figure import Figure, SubFigure
 from matplotlib.legend import Legend
 from matplotlib.transforms import Bbox
 from numpy.typing import ArrayLike
+from packaging.version import Version
 from typing_extensions import Literal
 
 from nested_grid_plotter.utils import (
@@ -32,7 +35,11 @@ from nested_grid_plotter.utils import (
 
 
 class NestedBuilder(abc.ABC):
-    """Abstract class for nested builders."""
+    """
+    Abstract class for nested builders.
+
+    .. versionadded:: 2.0
+    """
 
     @abc.abstractmethod
     def __call__(
@@ -45,7 +52,11 @@ class NestedBuilder(abc.ABC):
 
 
 class SubplotsMosaicBuilder(NestedBuilder):
-    """Args and kwargs for Figure.subfigures routine."""
+    """
+    Args and kwargs for Figure.subfigures routine.
+
+    .. versionadded:: 2.0
+    """
 
     def __init__(
         self,
@@ -142,7 +153,10 @@ class SubplotsMosaicBuilder(NestedBuilder):
             it is possible to use a single string instead of a tuple as keys;
             i.e. ``"AB"`` is equivalent to ``("A", "B")``.
 
-            .. versionadded:: 3.7
+            Note
+            ====
+            This parameter was introduced in matplotlib 3.7 and will be ignored when
+            using versions 3.5 or 3.6.
 
         gridspec_kw : dict, optional
             Dictionary with keywords passed to the `.GridSpec` constructor used
@@ -161,11 +175,29 @@ class SubplotsMosaicBuilder(NestedBuilder):
         self.mosaic = mosaic
         self.sharex: bool = sharex
         self.sharey: bool = sharey
-        self.width_ratios = width_ratios
-        self.height_ratios = height_ratios
         self.empty_sentinel = empty_sentinel
         self.subplot_kw = subplot_kw
         self.per_subplot_kw = per_subplot_kw
+        self.empty_sentinel = empty_sentinel
+        self.subplot_kw = subplot_kw
+        self.per_subplot_kw = per_subplot_kw
+        # height_ratios and width ratios were introduced in matplotlib 3.6
+        # for 3.5, it must be added to gridspec_kw
+        gridspec_kw = dict(gridspec_kw or {})
+        if height_ratios is not None:
+            if "height_ratios" in gridspec_kw:
+                raise ValueError(
+                    "'height_ratios' must not be defined both as "
+                    "parameter and as key in 'gridspec_kw'"
+                )
+            gridspec_kw["height_ratios"] = height_ratios
+        if width_ratios is not None:
+            if "width_ratios" in gridspec_kw:
+                raise ValueError(
+                    "'width_ratios' must not be defined both as "
+                    "parameter and as key in 'gridspec_kw'"
+                )
+            gridspec_kw["width_ratios"] = width_ratios
         self.gridspec_kw = gridspec_kw
 
     def __call__(
@@ -175,11 +207,33 @@ class SubplotsMosaicBuilder(NestedBuilder):
         grouped_sf_dict: Dict[str, Dict[str, SubFigure]],
         grouped_ax_dict: Dict[str, Dict[str, Axes]],
     ) -> None:
-        grouped_ax_dict[figname] = fig.subplot_mosaic(**self.__dict__)
+        grouped_ax_dict[figname] = fig.subplot_mosaic(
+            **_make_kwargs_retrocompatible(mpl.__version__, self)
+        )
+
+
+def _make_kwargs_retrocompatible(
+    mpl_version: str, builder: SubplotsMosaicBuilder
+) -> Dict[str, Any]:
+    kwargs = dict(builder.__dict__)
+
+    # per_subplot_kw was introduced in matplotlib 3.7
+    if Version(mpl_version) < Version("3.7"):
+        if kwargs.pop("per_subplot_kw") is not None:
+            warnings.warn(
+                'Parameter "per_subplot_kw" is supported from matplotlib 3.7 '
+                f"while you use version {mpl_version} and it is consequently "
+                "ignored."
+            )
+    return kwargs
 
 
 class SubfigsBuilder(NestedBuilder):
-    """Args and kwargs for Figure.subfigures routine."""
+    """
+    Args and kwargs for Figure.subfigures routine.
+
+    .. versionadded:: 2.0
+    """
 
     def __init__(
         self,
