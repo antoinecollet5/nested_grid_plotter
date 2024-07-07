@@ -18,7 +18,7 @@ from matplotlib.axes import Axes
 from matplotlib.axes._base import _AxesBase
 from typing_extensions import Literal
 
-NDArrayFloat = npt.NDArray[np.float_]
+NDArrayFloat = npt.NDArray[np.float64]
 # pylint: disable=C0103 # does not confrom to snake case naming style
 # pylint: disable=R0913 # too many arguments
 # pylint: disable=R0914 # too many local variables
