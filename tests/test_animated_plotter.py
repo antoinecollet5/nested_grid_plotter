@@ -74,8 +74,8 @@ def make_2_frames_plotter() -> ngp.AnimatedPlotter:
     )
 
 
-def test_init() -> ngp.AnimatedPlotter:
-    return ngp.AnimatedPlotter()
+def test_init() -> None:
+    assert ngp.AnimatedPlotter() is not None
 
 
 def test_no_animation() -> None:
@@ -306,10 +306,18 @@ def test_1D_exceptions_6() -> None:
 
 
 @pytest.mark.parametrize(
-    "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel",
+    "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel,expected_warnings",
     [
-        (True, False, None, None, None, None),
-        (True, True, "my title", {"vmin": 2.0, "vmax": 5.0}, "xlab", "ylab"),
+        (True, False, None, None, None, None, does_not_raise()),
+        (
+            True,
+            True,
+            "my title",
+            {"vmin": 2.0, "vmax": 5.0},
+            "xlab",
+            "ylab",
+            does_not_raise(),
+        ),
         (
             False,
             True,
@@ -317,11 +325,24 @@ def test_1D_exceptions_6() -> None:
             {"norm": colors.LogNorm(vmin=1e-6, vmax=100.0)},
             "xlab",
             "ylab",
+            pytest.warns(
+                UserWarning,
+                match="You used a LogNorm norm instance which is incompatible with a "
+                "symmetric colorbar. Symmetry is ignored. Use SymLogNorm for "
+                "symmetrical logscale color bar.",
+            ),
         ),
     ],
 )
 def test_animated_multi_imshow(
-    tmp_folder, is_fig, is_symmetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel
+    tmp_folder,
+    is_fig,
+    is_symmetric_cbar,
+    cbar_title,
+    imshow_kwargs,
+    xlabel,
+    ylabel,
+    expected_warnings,
 ) -> None:
     plotter = make_2_frames_plotter()
 
@@ -347,17 +368,18 @@ def test_animated_multi_imshow(
         fig = None
 
     # Plot it
-    plotter.animated_multi_imshow(
-        ["ax11", "ax12"],
-        data,
-        fig=fig,
-        nb_frames=nb_frames,
-        imshow_kwargs=imshow_kwargs,
-        cbar_title=cbar_title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        is_symmetric_cbar=is_symmetric_cbar,
-    )
+    with expected_warnings:
+        plotter.animated_multi_imshow(
+            ["ax11", "ax12"],
+            data,
+            fig=fig,
+            nb_frames=nb_frames,
+            imshow_kwargs=imshow_kwargs,
+            cbar_title=cbar_title,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            is_symmetric_cbar=is_symmetric_cbar,
+        )
     # plotter.close() -> this crashes on github pipelines
     plotter.animate(nb_frames=nb_frames)
 
