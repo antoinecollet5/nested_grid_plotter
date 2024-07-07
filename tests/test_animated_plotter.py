@@ -9,9 +9,9 @@ follow the same order.
 
 import itertools
 import re
-from contextlib import contextmanager
+from contextlib import nullcontext as does_not_raise
 from pathlib import Path
-from typing import Generator, List, Optional
+from typing import List, Optional
 
 import nested_grid_plotter as ngp
 import numpy as np
@@ -24,11 +24,6 @@ from nested_grid_plotter.animated_plotter import _get_nb_frames
 
 # turns all warnings into errors for this module
 # pytestmark = pytest.mark.filterwarnings("error")
-
-
-@contextmanager
-def does_not_raise() -> Generator[None, None, None]:
-    yield
 
 
 @pytest.fixture

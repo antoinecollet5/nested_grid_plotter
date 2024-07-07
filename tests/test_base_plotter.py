@@ -8,7 +8,7 @@ follow the same order. The
 """
 
 import struct
-from contextlib import contextmanager
+from contextlib import nullcontext as does_not_raise
 from itertools import product
 
 import matplotlib as mpl
@@ -19,11 +19,6 @@ from matplotlib.axes import Axes
 from matplotlib.figure import SubFigure
 from matplotlib.lines import Line2D
 from packaging.version import Version
-
-
-@contextmanager
-def does_not_raise():
-    yield
 
 
 @pytest.fixture

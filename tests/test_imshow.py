@@ -8,7 +8,7 @@ follow the same order.
 """
 
 import re
-from contextlib import contextmanager
+from contextlib import nullcontext as does_not_raise
 from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
@@ -25,11 +25,6 @@ from nested_grid_plotter.imshow import (
     add_2d_grid,
     multi_imshow,
 )
-
-
-@contextmanager
-def does_not_raise():
-    yield
 
 
 def get_2_axes() -> Tuple[Figure, Tuple[Axes, Axes]]:
