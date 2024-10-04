@@ -107,6 +107,7 @@ def make_patch_spines_invisible(ax: Axes) -> None:
 def extract_frames_from_embedded_html_animation(
     fpath: Union[str, Path],
     target_path: Optional[Union[str, Path]] = None,
+    start_indices_at_one: bool = True,
 ) -> None:
     """
     Extract the embedded frames from an html animation created with matplotlib.
@@ -119,6 +120,9 @@ def extract_frames_from_embedded_html_animation(
         Target path where to store the extracted frames. If None, a folder with
         the name of the html file is created at the location of the html file. If
         default is None.
+    start_indices_at_one: bool
+        Whether to start indices at one or ay zero. The default is True, i.e., start at
+        one.
 
     Notes
     -----
@@ -137,6 +141,8 @@ def extract_frames_from_embedded_html_animation(
         r'(?P<frame_format>jpeg|tiff|png|svg\+xml);base64,(?P<content>[^ "]+)"'
     )
 
+    start_index: int = 1 if start_indices_at_one else 0
+
     # Iterate the patterns
     for m in pattern.finditer(input_text):
         res = m.groupdict()
@@ -144,7 +150,7 @@ def extract_frames_from_embedded_html_animation(
         if frame_format == r"svg+xml":
             frame_format = "svg"
         path = _target_path.joinpath(
-            f"frame{int(res.get('frame_index')):0>7d}.{frame_format}"
+            f"frame{int(res.get('frame_index')) + start_index:0>7d}.{frame_format}"
         )
         if frame_format == "svg":
             path.write_text(
@@ -635,19 +641,21 @@ def _get_min_abs_lims(
 
 
 def _make_axes_symmetric_zero_centered(
-    axes: Union[Axes, List[Axes]],
+    axes: Union[_AxesBase, List[_AxesBase]],
     is_yaxis: bool,
     min_abs_lims: Optional[Union[float, List[float]]] = None,
 ) -> None:
     _axes = object_or_object_sequence_to_list(axes)
     _min_abs_lims = _get_min_abs_lims(
         _axes,
-        object_or_object_sequence_to_list(min_abs_lims)
-        if min_abs_lims is not None
-        else None,
+        (
+            object_or_object_sequence_to_list(min_abs_lims)
+            if min_abs_lims is not None
+            else None
+        ),
     )
 
-    def get_lim(ax: Axes) -> Tuple[float, float]:
+    def get_lim(ax: _AxesBase) -> Tuple[float, float]:
         if is_yaxis:
             return ax.get_ylim()
         return ax.get_xlim()
@@ -701,7 +709,8 @@ def make_x_axes_symmetric_zero_centered(
 
 
 def make_y_axes_symmetric_zero_centered(
-    axes: Union[Axes, List[Axes]], min_ylims: Optional[Union[float, List[float]]] = None
+    axes: Union[_AxesBase, List[_AxesBase]],
+    min_ylims: Optional[Union[float, List[float]]] = None,
 ) -> None:
     """
     Make y-axis symmetric in zero for all provided axes.
@@ -927,7 +936,7 @@ def add_xaxis_twin_as_date(
     )
 
 
-def add_letter_to_frames(axes: Sequence[Axes]) -> None:
+def add_letter_to_frames(axes: Sequence[Axes], zorder: int = 10) -> None:
     """
     Add a letter at the top left hand corner of the frame of the given axes.
 
@@ -938,6 +947,8 @@ def add_letter_to_frames(axes: Sequence[Axes]) -> None:
     ----------
     axes : Sequence[Axes]
         Sequence of axes to label.
+    zorder: int
+        Drawing order for axes is patches, lines, text. The default is 10.
     """
     # dict of letters
     d = dict(enumerate(string.ascii_lowercase, 1))
@@ -963,4 +974,5 @@ def add_letter_to_frames(axes: Sequence[Axes]) -> None:
             ha="left",
             fontweight="bold",
             bbox=dict(facecolor="white", edgecolor="k", pad=5.0),
+            zorder=zorder,
         )
