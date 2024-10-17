@@ -975,4 +975,5 @@ def add_letter_to_frames(axes: Sequence[Axes], zorder: int = 10) -> None:
             fontweight="bold",
             bbox=dict(facecolor="white", edgecolor="k", pad=5.0),
             zorder=zorder,
+            family="monospace",
         )
