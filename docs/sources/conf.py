@@ -51,7 +51,6 @@ def setup(app):
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    "sphinxcontrib.plantuml",  # renders diagrams by using PlantUML.
     "sphinx.ext.todo",  # Support for todo items
     "sphinx.ext.autodoc",  # Core library for html generation from docstrings
     "sphinx.ext.autosummary",  # Create neat summary tables

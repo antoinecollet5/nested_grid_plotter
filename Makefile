@@ -31,7 +31,7 @@ clean: clean-build clean-pyc clean-test clean-lint ## remove all build, test, co
 clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr docs/build/
-	rm -fr docs/source/_autosummary/
+	rm -fr docs/sources/_autosummary/
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +

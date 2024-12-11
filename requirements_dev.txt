@@ -1,29 +1,27 @@
+# install
 pip
 wheel
 
-twine==1.14.0
+# test
+twine
 pytest
 pytest-runner
 pytest-cov
 pytest-cookies
-nbmake
 coverage
-ruff
+nbmake
+
+# lint and format
 pre-commit
-codespell
+codespell>=2.1.0
+ruff
 
-# doc
-docutils<0.21  # because of compatibility issue with nbsphinx-link
+# docs
+sphinx>=5.0.0
 nbsphinx
-nbsphinx-link
-sphinx<=7.3.6 # jupyter_sphinx requires sphinx>=2
+nbsphinx-link>=1.3.1
 jupyter_sphinx>=0.3.2
-sphinxcontrib-plantuml
-pygments>=2.6.1
+sphinx-jsonschema>=1.15
+pygments>=2.11.1
 pydata-sphinx-theme
-numpydoc
-jinja2==3.0.3
-
-numpy>=1.21
-matplotlib >= 3.5.1
-typing_extensions
+sphinxcontrib-bibtex
