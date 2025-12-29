@@ -595,9 +595,7 @@ def _align_axes_on_values(
         aligns = [ticks[ii][0] for ii in range(n_ax)]
     else:
         if len(align_values) != n_ax:
-            raise ValueError(
-                "Length of <axes> doesn't equal that " "of <align_values>."
-            )
+            raise ValueError("Length of <axes> doesn't equal that of <align_values>.")
         aligns = align_values
 
     # Get upper and lower bounds of each axis
@@ -961,7 +959,7 @@ def add_letter_to_frames(axes: Sequence[Axes], zorder: int = 10) -> None:
     else:  # need to add numbers to letters
 
         def _get_letter(_i: int) -> str:
-            return f"{d[_i%26 + 1]}-{_i//26+1}"
+            return f"{d[_i % 26 + 1]}-{_i // 26 + 1}"
 
     for i, ax in enumerate(axes):
         ax.text(
