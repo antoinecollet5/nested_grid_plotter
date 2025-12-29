@@ -2,12 +2,14 @@
 
 import copy
 import warnings
+from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
 
 import numpy as np
 import numpy.typing as npt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import Animation, FuncAnimation, MovieWriter
 from matplotlib.axes import Axes
+from matplotlib.collections import LineCollection
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure, SubFigure
 from matplotlib.image import AxesImage
@@ -149,6 +151,118 @@ class AnimatedPlotter(NestedGridPlotter):
         )
         return self.animation
 
+    def save_animation(
+        self,
+        filename: Union[str, Path],
+        writer: Optional[MovieWriter] = None,
+        fps: Optional[int] = None,
+        dpi: Optional[float] = None,
+        codec: Optional[str] = None,
+        bitrate: Optional[int] = None,
+        extra_args: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, str]] = None,
+        extra_anim: Optional[List[Animation]] = None,
+        savefig_kwargs: Optional[Dict[str, Any]] = None,
+        *,
+        progress_callback: Optional[Callable] = None,
+    ) -> None:
+        """
+        Save the animation as a movie file by drawing every frame.
+
+        Parameters
+        ----------
+        filename : str
+            The output filename, e.g., :file:`mymovie.mp4`.
+
+        writer : `MovieWriter` or str, default: :rc:`animation.writer`
+            A `MovieWriter` instance to use or a key that identifies a
+            class to use, such as 'ffmpeg'.
+
+        fps : int, optional
+            Movie frame rate (per second).  If not set, the frame rate from the
+            animation's frame interval.
+
+        dpi : float, default: :rc:`savefig.dpi`
+            Controls the dots per inch for the movie frames.  Together with
+            the figure's size in inches, this controls the size of the movie.
+
+        codec : str, default: :rc:`animation.codec`.
+            The video codec to use.  Not all codecs are supported by a given
+            `MovieWriter`.
+
+        bitrate : int, default: :rc:`animation.bitrate`
+            The bitrate of the movie, in kilobits per second.  Higher values
+            means higher quality movies, but increase the file size.  A value
+            of -1 lets the underlying movie encoder select the bitrate.
+
+        extra_args : list of str or None, optional
+            Extra command-line arguments passed to the underlying movie encoder. These
+            arguments are passed last to the encoder, just before the output filename.
+            The default, None, means to use :rc:`animation.[name-of-encoder]_args` for
+            the builtin writers.
+
+        metadata : dict[str, str], default: {}
+            Dictionary of keys and values for metadata to include in
+            the output file. Some keys that may be of use include:
+            title, artist, genre, subject, copyright, srcform, comment.
+
+        extra_anim : list, default: []
+            Additional `Animation` objects that should be included
+            in the saved movie file. These need to be from the same
+            `.Figure` instance. Also, animation frames will
+            just be simply combined, so there should be a 1:1 correspondence
+            between the frames from the different animations.
+
+        savefig_kwargs : dict, default: {}
+            Keyword arguments passed to each `~.Figure.savefig` call used to
+            save the individual frames.
+
+        progress_callback : function, optional
+            A callback function that will be called for every frame to notify
+            the saving progress. It must have the signature ::
+
+                def func(current_frame: int, total_frames: int) -> Any
+
+            where *current_frame* is the current frame number and *total_frames* is the
+            total number of frames to be saved. *total_frames* is set to None, if the
+            total number of frames cannot be determined. Return values may exist but are
+            ignored.
+
+            Example code to write the progress to stdout::
+
+                progress_callback = lambda i, n: print(f'Saving frame {i}/{n}')
+
+        Notes
+        -----
+        *fps*, *codec*, *bitrate*, *extra_args* and *metadata* are used to
+        construct a `.MovieWriter` instance and can only be passed if
+        *writer* is a string.  If they are passed as non-*None* and *writer*
+        is a `.MovieWriter`, a `RuntimeError` will be raised.
+        """
+
+        engine = self.fig.get_layout_engine()
+        if engine is not None:
+            engine.execute(self.fig)
+
+        if savefig_kwargs is None:
+            savefig_kwargs = {}
+        savefig_kwargs.update(
+            {"bbox_extra_artists": tuple(self._get_bbox_extra_artists(savefig_kwargs))}
+        )
+        self.animation.save(
+            filename,
+            writer=writer,
+            fps=fps,
+            dpi=dpi,
+            codec=codec,
+            bitrate=bitrate,
+            extra_args=extra_args,
+            metadata=metadata,
+            extra_anim=extra_anim,
+            savefig_kwargs=savefig_kwargs,
+            progress_callback=progress_callback,
+        )
+
     def plot_animated_text(
         self, ax: Axes, x: float, y: float, s: Sequence[str], **kwargs: Any
     ) -> None:
@@ -230,6 +344,7 @@ class AnimatedPlotter(NestedGridPlotter):
         # store all data in a list
         x_list: List[NDArrayFloat] = []
         y_list: List[NDArrayFloat] = []
+        c_dict: Dict[str, Any] = {}
         # The results are stored in plot_dict and allow updating the values.
         plot_dict = {}
 
@@ -243,6 +358,20 @@ class AnimatedPlotter(NestedGridPlotter):
                 raise ValueError(
                     f'Error with data arguments: for key "{label}" y must be given!'
                 )
+
+            # color
+            c = val.get("c")
+            # Check color array size (LineCollection still works, but values are unused)
+            if c is not None:
+                if len(c) != len(x) - 1:
+                    warnings.warn(
+                        "The c argument should have a length one less than the "
+                        "length of x and y. "
+                        "If it has the same length, use the colored_line "
+                        "function instead."
+                    )
+                c_dict[label] = c
+                print(c_dict[label])
 
             # Generate a series to adjust the y axis bounds without setting
             # y_extend = np.nanmax(y_list) - np.nanmin(y_list)
@@ -316,6 +445,170 @@ class AnimatedPlotter(NestedGridPlotter):
                 plot_dict[label].set_ydata(
                     y_list[index][:, data_index],
                 )
+
+                try:
+                    plot_dict[label].set_color(c_dict[label][data_index])
+                except (IndexError, KeyError):
+                    pass
+
+            return list(plot_dict.values())
+
+        self.init_animations_list.append(_init)
+        self.animations_list.append(_animate)
+
+    def animated_colored_line_between_pts(
+        self,
+        ax_name: str,
+        data: Dict[str, Dict[str, Any]],
+        nb_frames: Optional[int] = None,
+        title: Optional[str] = None,
+        xlabel: Optional[str] = None,
+        ylabel: Optional[str] = None,
+    ) -> None:
+        """
+        Plot a 1D animated curves.
+
+        The number of frames can be determined automatically from the data.
+
+        Parameters
+        ----------
+        ax_name : str
+            Name of the axis on which to plot the animation.
+        data : Dict[str, Dict[str, Any]]]
+            Data to be plotted.
+        nb_frames: int
+            Number of frames to use in the animation. If None, the second dimension of
+            the provided data arrays is used.
+        title : Optional[str], optional
+            Title to give to the plot. The default is None.
+        xlabel : Optional[str], optional
+            Label for the xaxis. The default is None.
+        ylabel : Optional[str], optional
+            Label for the yaxis. The default is None.
+
+        Raises
+        ------
+        ValueError
+            If the provided `data` dictionary contains inconsistent arrays.
+
+        Returns
+        -------
+        None
+
+        """
+        ax: Axes = self.ax_dict[ax_name]
+
+        # store all data in a list
+        x_list: List[NDArrayFloat] = []
+        y_list: List[NDArrayFloat] = []
+        # The results are stored in plot_dict and allow updating the values.
+        plot_dict = {}
+
+        def _get_segments(_x: NDArrayFloat, _y: NDArrayFloat) -> Sequence[NDArrayFloat]:
+            points = np.array([_x, _y]).T.reshape(-1, 1, 2)
+            return np.concatenate([points[:-1], points[1:]], axis=1)
+
+        for label, val in data.items():
+            kwargs: Dict[str, Any] = val.get("kwargs", {})
+            x = val.get("x", None)
+            _val = val.get("y")
+            if _val is not None:
+                y: NDArrayFloat = _val
+            else:
+                raise ValueError(
+                    f'Error with data arguments: for key "{label}" y must be given!'
+                )
+
+            # Generate a series to adjust the y axis bounds without setting
+            # y_extend = np.nanmax(y_list) - np.nanmin(y_list)
+            y_extend = np.linspace(np.nanmin(y), np.nanmax(y), y.shape[0])
+
+            if x is not None:
+                x_extend: NDArrayFloat = np.linspace(
+                    np.nanmin(x), np.nanmax(x), x.shape[0]
+                )
+                x_list.append(x.reshape(x.shape[0], -1))  # make sure that x is 2d
+            else:
+                x_extend = np.arange(y.shape[0], dtype=np.float64)
+
+            # color
+            c = val.get("c")
+            # Check color array size (LineCollection still works, but values are unused)
+            if len(c) != len(x) - 1:
+                warnings.warn(
+                    "The c argument should have a length one less than the length "
+                    "of x and y. "
+                    "If it has the same length, use the colored_line function instead."
+                )
+
+            # Add the line collection
+            lc = LineCollection(_get_segments(x_extend, y_extend), **kwargs)
+            # Set the values used for colormapping
+            lc.set_array(c)
+            ax.add_collection(lc)
+
+            plot_dict[label] = lc
+            y_list.append(y)
+
+        nb_steps: int = y_list[0].shape[1]
+
+        # Number of x and y consistency
+        if len(x_list) != 0 and (len(x_list) != len(y_list)):
+            raise ValueError(
+                "When the x vector is provided, it must be for each y vector!"
+            )
+
+        # Check that all arrays have the same number of frames
+        if not all((y_list[0].shape[1] == y.shape[1] for y in y_list[1:])):
+            raise ValueError(
+                "Not all given y arrays have the same number of steps (last dimension)!"
+            )
+        if len(x_list) > 1:
+            if not all((x_list[0].shape[1] == x.shape[1] for x in x_list[1:])):
+                raise ValueError(
+                    "Not all given x arrays have the same number "
+                    "of steps (last dimension)!"
+                )
+
+        # Check the dimensions
+        if not all((y_list[0].shape[0] == y.shape[0] for y in y_list[1:])):
+            raise ValueError(
+                "Not all given y arrays have the same first dimension (n values)!"
+            )
+
+        if title:
+            ax.set_title(title, fontweight="bold")
+        if xlabel:
+            ax.set_xlabel(xlabel, fontweight="bold")
+        if ylabel:
+            ax.set_ylabel(ylabel, fontweight="bold")
+
+        def _init() -> List[LineCollection]:
+            """Only required for blitting to give a clean slate."""
+            for label in data.keys():
+                plot_dict[label].set_segments([])
+            return list(plot_dict.values())
+
+        _nb_frames: int = _get_nb_frames(nb_frames, nb_steps)
+
+        def _animate(frame_index: int) -> List[LineCollection]:
+            """Update the data of the plot."""
+            # subtract -1 to nb_steps and _nb_frames so that when
+            # frame_index = 0, we get the first element of x_list, and when
+            # frame_index = _nb_frames - 1, we get the last element of x_list.
+            data_index: int = int((nb_steps - 1) / (_nb_frames - 1) * frame_index)
+            for index, label in enumerate(data.keys()):
+                # update x
+                if len(x_list) != 0:
+                    try:
+                        plot_dict[label].set_segments(
+                            _get_segments(
+                                x_list[index][:, data_index],
+                                y_list[index][:, data_index],
+                            )
+                        )
+                    except IndexError:
+                        pass
             return list(plot_dict.values())
 
         self.init_animations_list.append(_init)
