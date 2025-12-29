@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import abc
 import copy
+import platform
 import warnings
 from collections import ChainMap
 from itertools import product
@@ -414,7 +415,7 @@ class Plotter:
                           )
         """
         if fig is None:
-            self.fig: Figure = Figure()
+            self.fig: Figure = plt.figure(constrained_layout=True)
         else:
             self.fig = fig
 
@@ -457,6 +458,11 @@ class Plotter:
         """Return all axes as a list."""
         return list(self.ax_dict.values())
 
+    @property
+    def axes_names(self) -> List[str]:
+        """Return all axes names as a list."""
+        return list(self.ax_dict.keys())
+
     def close(self) -> None:
         """Close the current figure."""
         plt.close(self.fig)
@@ -493,6 +499,36 @@ class Plotter:
                 "more than one subfigures!"
             )
 
+    def _get_bbox_extra_artists(
+        self, kwargs: Optional[Dict[str, Any]] = None
+    ) -> List[Artist]:
+        # make sure that if a fig legend as been added, it won't be cutoff by
+        # the figure box
+        if kwargs is None:
+            kwargs = {}
+
+        bbox_extra_artists = [
+            *kwargs.get("bbox_extra_artists", ()),
+            *self.fig.legends,
+            *[lgd for fig in self.sf_dict.values() for lgd in fig.legends],
+            *[ax.get_legend() for ax in self.axes if ax.get_legend() is not None],
+            *[
+                artist
+                for ax in self.axes
+                for artist in ax.get_default_bbox_extra_artists()
+            ],
+            # *[artist for ax in self.axes for artist in ax.artists],
+        ]
+        for fig in [self.fig, *self.sf_dict.values()]:
+            if fig._supxlabel is not None:  # type: ignore
+                bbox_extra_artists.append(fig._supxlabel)  # type: ignore
+            if fig._supylabel is not None:  # type: ignore
+                bbox_extra_artists.append(fig._supylabel)  # type: ignore
+            if fig._suptitle is not None:  # type: ignore
+                bbox_extra_artists.append(fig._suptitle)  # type: ignore
+
+        return bbox_extra_artists
+
     def savefig(self, *args: Any, **kwargs: Any) -> None:
         """
         Save the current figure.
@@ -511,21 +547,18 @@ class Plotter:
         # Ensure that all artists are saved (nothing should be cropped)
         # https://stackoverflow.com/questions/9651092/my-matplotlib-pyplot-legend-is-being-cut-off/42303455
         bbox_inches = kwargs.pop("bbox_inches", "tight")
-        # make sure that if a fig legend as been added, it won't be cutoff by
-        # the figure box
-        bbox_extra_artists = [
-            *kwargs.get("bbox_extra_artists", ()),
-            *self.fig.legends,
-            *[lgd for fig in self.sf_dict.values() for lgd in fig.legends],
-        ]
-        for fig in [self.fig, *self.sf_dict.values()]:
-            if fig._supxlabel is not None:  # type: ignore
-                bbox_extra_artists.append(fig._supxlabel)  # type: ignore
-            if fig._supylabel is not None:  # type: ignore
-                bbox_extra_artists.append(fig._supylabel)  # type: ignore
-            if fig._suptitle is not None:  # type: ignore
-                bbox_extra_artists.append(fig._suptitle)  # type: ignore
-        kwargs.update({"bbox_extra_artists": tuple(bbox_extra_artists)})
+
+        kwargs.update(
+            {"bbox_extra_artists": tuple(self._get_bbox_extra_artists(kwargs))}
+        )
+        if len(kwargs["bbox_extra_artists"]) != 0:
+            if Version(platform.python_version()) < Version("3.8"):
+                warnings.warn(
+                    "There are bbox extra artists to save but this is not"
+                    " supported for python 3.7. Please use python 3.8 or above. "
+                )
+                kwargs.pop("bbox_extra_artists")
+
         self.fig.savefig(*args, **kwargs, bbox_inches=bbox_inches)
         # need this if 'transparent=True' to reset colors
         self.fig.canvas.draw_idle()
@@ -738,6 +771,7 @@ class Plotter:
         bbox_x_shift: float = 0.0,
         bbox_y_shift: float = 0.0,
         loc: Literal["left", "right", "top", "bottom"] = "bottom",
+        is_reverse_items: bool = False,
         **kwargs: Any,
     ) -> Optional[Legend]:
         """
@@ -756,6 +790,9 @@ class Plotter:
             Legend horizontal shift (right oriented). The default is 0.0.
         loc : Literal["left", "right", "top", "bottom"], optional
             Side on which to place the legend box. The default is "bottom".
+        is_reverse_items: bool
+            Whether to reverse the order of items in the legend. The default is False.
+            .. versionadded:: 2.0
         **kwargs : Any
             Additional arguments for `plt.legend`.
 
@@ -777,7 +814,7 @@ class Plotter:
             bbox_transform = obj.transSubfigure
         # Make sure that the figure of the handles is the figure of the legend
         # RunTimeError Can not put single artist in more than one figure
-        for i in range(len(handles)):
+        for i, _ in enumerate(handles):
             if handles[i].figure is not obj:
                 handles[i] = copy.copy(handles[i])
                 handles[i].figure = obj
@@ -790,8 +827,8 @@ class Plotter:
         bbox_to_anchor[1] += bbox_y_shift
 
         return obj.legend(
-            handles,
-            labels,
+            handles[::-1] if is_reverse_items else handles,
+            labels[::-1] if is_reverse_items else labels,
             loc="center",
             bbox_to_anchor=bbox_to_anchor,
             bbox_transform=bbox_transform,
@@ -805,6 +842,7 @@ class Plotter:
         bbox_y_shift: Optional[float] = None,
         loc: Literal["left", "right", "top", "bottom"] = "bottom",
         borderaxespad: float = 1.0,
+        is_reverse_items: bool = False,
         **kwargs: Any,
     ) -> Optional[Legend]:
         """
@@ -820,6 +858,9 @@ class Plotter:
             Legend horizontal shift (right oriented). The default is 0.0.
         loc : Literal["left", "right", "top", "bottom"], optional
             Side on which to place the legend box. The default is "bottom".
+        is_reverse_items: bool
+            Whether to reverse the order of items in the legend. The default is False.
+            .. versionadded:: 2.0
         **kwargs : Any
             Additional arguments for `plt.legend`.
 
@@ -849,8 +890,8 @@ class Plotter:
 
         # Generate the figure a first time
         lgd = ax.legend(
-            handles,
-            labels,
+            handles[::-1] if is_reverse_items else handles,
+            labels[::-1] if is_reverse_items else labels,
             loc="center",
             bbox_to_anchor=bbox_to_anchor,
             bbox_transform=ax.transAxes,
@@ -875,6 +916,9 @@ class Plotter:
             engine.execute(self.fig)
         else:
             return lgd
+
+        # TODO: need to take twin axes into account
+        # ax.get_shared_x_axes().get_siblings(ax)[0]
 
         # We estimate the bbox_to_anchor adjustment from tight_boxes
         # This is not exact and depends on tight or constrained layout
@@ -948,8 +992,8 @@ class Plotter:
         #         bbox_to_anchor[1] -= 0.025
 
         lgd = ax.legend(
-            handles,
-            labels,
+            handles[::-1] if is_reverse_items else handles,
+            labels[::-1] if is_reverse_items else labels,
             loc="center",
             bbox_to_anchor=bbox_to_anchor,
             bbox_transform=ax.transAxes,
@@ -963,7 +1007,7 @@ class Plotter:
         return lgd
 
     def add_axis_legend(
-        self, ax_name: str, **kwargs: Any
+        self, ax_name: str, is_reverse_items: bool = False, **kwargs: Any
     ) -> Tuple[List[Any], List[str]]:
         """
         Add a legend to the graphic.
@@ -972,6 +1016,9 @@ class Plotter:
         ----------
         ax_name : str
             Ax for which to add the legend.
+        is_reverse_items: bool
+            Whether to reverse the order of items in the legend. The default is False.
+            .. versionadded:: 2.0
         **kwargs : Any
             Additional arguments for `plt.legend`.
 
@@ -986,11 +1033,10 @@ class Plotter:
         )
 
         self.ax_dict[ax_name].legend(
-            handles,
-            labels,
+            handles[::-1] if is_reverse_items else handles,
+            labels[::-1] if is_reverse_items else labels,
             **kwargs,
         )
-
         return handles, labels
 
     def add_extra_legend_item(self, ax_name: str, handle: Any, label: str) -> None:
