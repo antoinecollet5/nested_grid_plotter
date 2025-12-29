@@ -21,6 +21,7 @@ from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,
+    _get_argsort_im_data,
     _norm_data_and_cbar,
     add_2d_grid,
     multi_imshow,
@@ -203,3 +204,67 @@ def test_multi_imshow_exception() -> None:
         " 3 whereas it should be two dimensional!",
     ):
         multi_imshow(axes, fig, data)
+
+
+@pytest.mark.parametrize(
+    "data, expected_order, expected_exception",
+    [
+        (
+            {
+                "data1": np.ones((2, 4)).T,
+            },
+            [0],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((65, 1)).T,
+                "data2": np.ones((65, 1)).T,
+                "data3": np.ones((65, 1)).T,
+                "data4": np.ones((65, 1)).T,
+            },
+            [0, 1, 2, 3],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((2, 2)).T,
+                "data2": np.ones((2, 3)).T,
+                "data3": np.ones((2, 2)).T,
+            },
+            [0, 2, 1],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((4, 2)).T,
+                "data2": np.ones((2, 2)).T,
+                "data3": np.ones((5, 2)).T,
+            },
+            [1, 0, 2],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((4, 2)).T,
+                "data2": np.ones((2, 5)).T,
+                "data3": np.ones((5, 2)).T,
+            },
+            [0, 1, 2],
+            pytest.warns(
+                UserWarning,
+                match=(
+                    re.escape(
+                        r"Data have different shapes: {'data1': (2, 4), "
+                        r"'data2': (5, 2), 'data3':"
+                        r" (2, 5)}. This might cause display issues "
+                        r"if some axes share xaxis or yaxis!"
+                    )
+                ),
+            ),
+        ),
+    ],
+)
+def test_get_argsort_im_data(data, expected_order, expected_exception) -> None:
+    with expected_exception:
+        np.testing.assert_equal(_get_argsort_im_data(data), expected_order)
