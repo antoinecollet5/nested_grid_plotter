@@ -340,7 +340,7 @@ class SubfigsBuilder(NestedBuilder):
                 }
 
 
-class NestedGridPlotter:
+class Plotter:
     """
     General class to wrap matplotlib plots.
 
@@ -485,8 +485,7 @@ class NestedGridPlotter:
         non_unique_keys = [k for k, v in temp.items() if len(v) > 1]
         if len(non_unique_keys) == 1:
             raise Exception(
-                f"The name {non_unique_keys} has been used in "
-                "more than one subfigures!"
+                f"The name {non_unique_keys} has been used in more than one subfigures!"
             )
         if len(non_unique_keys) > 1:
             raise Exception(
@@ -991,6 +990,7 @@ class NestedGridPlotter:
             labels,
             **kwargs,
         )
+
         return handles, labels
 
     def add_extra_legend_item(self, ax_name: str, handle: Any, label: str) -> None:
@@ -1035,6 +1035,12 @@ class NestedGridPlotter:
         self.fig.legends.clear()
         for subfig in self.sf_dict.values():
             subfig.legends.clear()
+
+
+class NestedGridPlotter(Plotter):
+    """
+    Alias for `Plotter` for backward compatibility.
+    """
 
 
 def get_bbox_to_anchor(loc: str) -> List[float]:

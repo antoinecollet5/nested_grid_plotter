@@ -15,6 +15,7 @@ Classes
 
     SubfigsBuilder
     SubplotsMosaicBuilder
+    Plotter
     NestedGridPlotter
     AnimatedPlotter
 
@@ -59,6 +60,7 @@ from nested_grid_plotter.__about__ import __author__, __name__, __version__
 from nested_grid_plotter.animated_plotter import AnimatedPlotter
 from nested_grid_plotter.base_plotter import (
     NestedGridPlotter,
+    Plotter,
     SubfigsBuilder,
     SubplotsMosaicBuilder,
 )
@@ -91,6 +93,7 @@ __all__ = [
     "Figure",
     "SubplotsMosaicBuilder",
     "SubfigsBuilder",
+    "Plotter",
     "NestedGridPlotter",
     "AnimatedPlotter",
     "get_line_style",
