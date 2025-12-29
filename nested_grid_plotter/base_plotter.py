@@ -817,6 +817,7 @@ class Plotter:
         for i, _ in enumerate(handles):
             if handles[i].figure is not obj:
                 handles[i] = copy.copy(handles[i])
+                handles[i]._parent_figure = None
                 handles[i].figure = obj
 
         # Remove a potentially existing legend
