@@ -53,8 +53,11 @@ jobs:
         with:
           python-version: 3.13
 
-      - name: Install project
-        run: pip install -e ".[all]"
+      - name: Install dependencies with uv
+        run: |
+          pip install uv
+          uv venv
+          uv pip install -e ".[all]"
 
       - name: Set up xvfb
         run: |
