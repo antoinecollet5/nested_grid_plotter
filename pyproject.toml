@@ -22,7 +22,7 @@ dependencies = [
     "numpy",
     "matplotlib>=3.5.1",
     "packaging; python_version < '3.8'",
-    "typing_extensions; python_version < '3.8'",
+    "typing_extensions",
 ]
 requires-python = ">=3.7"
 classifiers = [
