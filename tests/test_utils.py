@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Antoine COLLET
 """
 Test the utilities.
 
@@ -32,7 +34,7 @@ def test_get_line_style() -> None:
     ngp.get_line_style("solid")
 
 
-def create_animation() -> animation:
+def create_animation() -> animation.FuncAnimation:
     fig, ax = plt.subplots()
 
     x = np.arange(0, 2 * np.pi, 0.01)

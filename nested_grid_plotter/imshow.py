@@ -79,13 +79,13 @@ def add_2d_grid(
         x=np.arange(0, nx) + 0.5,
         ymin=np.full(nx, 0) - 0.5,
         ymax=np.full(nx, ny) - 0.5,
-        **_kwargs,
+        **_kwargs,  # ty: ignore[invalid-argument-type]
     )
     ax.hlines(
         y=np.arange(0, ny) + 0.5,
         xmin=np.full(ny, 0) - 0.5,
         xmax=np.full(ny, nx) - 0.5,
-        **_kwargs,
+        **_kwargs,  # ty: ignore[invalid-argument-type]
     )
 
 

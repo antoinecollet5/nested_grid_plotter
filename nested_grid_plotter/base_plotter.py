@@ -819,8 +819,9 @@ class Plotter:
         for i, _ in enumerate(handles):
             if handles[i].figure is not obj:
                 handles[i] = copy.copy(handles[i])
-                handles[i]._parent_figure = None
-                handles[i].figure = obj
+                # TODO: fix this
+                handles[i]._parent_figure = None  # ty: ignore[unresolved-attribute]
+                handles[i].figure = obj  # ty: ignore[invalid-assignment]
 
         # Remove a potentially existing legend
         obj.legends.clear()
@@ -1130,6 +1131,9 @@ def is_lgd_overlapping_axis(ax: Axes, lgd: Legend) -> bool:
         ]
     )
     lgd_bbox = lgd.get_tightbbox()
+
+    if ax_bbox is None or lgd_bbox is None:
+        return False
 
     # take the legend border axespad into account.
     pad = lgd.borderaxespad * lgd.prop.get_size()

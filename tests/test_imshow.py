@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Antoine COLLET
 """
 Tests for the imshow sub module.
 
@@ -102,21 +104,23 @@ def test_normalize_data_and_cbar(
     data2 = np.random.uniform(low=0.5, high=4.0, size=(10, 10))
 
     im1 = ax1.imshow(data1)
-    assert 1.0 > im1.norm.vmin > -1.0
-    assert 1.0 > im1.norm.vmax > -1.0
+    assert 1.0 > im1.norm.vmin > -1.0  # ty: ignore[unsupported-operator]
+    assert 1.0 > im1.norm.vmax > -1.0  # ty: ignore[unsupported-operator]
     im2 = ax2.imshow(data2)
-    assert 4.0 > im2.norm.vmin > 0.5
-    assert 4.0 > im2.norm.vmax > 0.5
+    assert 4.0 > im2.norm.vmin > 0.5  # ty: ignore[unsupported-operator]
+    assert 4.0 > im2.norm.vmax > 0.5  # ty: ignore[unsupported-operator]
     _norm_data_and_cbar(
         [im1, im2], [data1, data2], imshow_kwargs, is_symmetric_cbar=is_symmetric
     )
-    assert im1.norm.vmax == im2.norm.vmax
-    assert im1.norm.vmin == im2.norm.vmin
-    assert im1.norm.vmax > 1.0
-    assert 0.5 > im2.norm.vmin
+    assert im1.norm.vmax == im2.norm.vmax  # ty: ignore[unsupported-operator]
+    assert im1.norm.vmin == im2.norm.vmin  # ty: ignore[unsupported-operator]
+    assert im1.norm.vmax > 1.0  # ty: ignore[unsupported-operator]
+    assert 0.5 > im2.norm.vmin  # ty: ignore[unsupported-operator]
 
     if is_symmetric:
-        assert im1.norm.vmin == -im1.norm.vmax == -np.max(data2)
+        assert (
+            im1.norm.vmin == -im1.norm.vmax == -np.max(data2)  # ty: ignore[unsupported-operator]
+        )
 
 
 @pytest.mark.parametrize(

@@ -6,15 +6,13 @@ Created on Sat Feb 12 10:20:08 2022
 @author: acollet
 """
 
+import matplotlib.pyplot as plt
+import nested_grid_plotter as ngp
 import numpy as np
-from nested_grid_plotter import NestedGridPlotter
 
-plotter = NestedGridPlotter(
-    fig_params={
-        "constrained_layout": False,
-        "figsize": (15, 5),
-    },  # Always use this to prevent overlappings
-    subfigs_params={"ncols": 3},
+plotter = ngp.Plotter(
+    plt.figure(figsize=(15, 5), constrained_layout=False),
+    builder=ngp.SubplotsMosaicBuilder([["ax1-1", "ax1-2", "ax1-3"]]),
 )
 # Make some data
 np.random.seed(1)
@@ -38,7 +36,7 @@ ax2_twin = ax2.twinx()
 ax2_twin.plot(data_cum)
 ax2.grid()
 ax2_twin.grid()
-plotter.align_y_axes([ax2, ax2_twin])
+ngp.align_y_axes([ax2, ax2_twin])
 ax2.set_title("Default alignment")
 
 # This is not optimal
@@ -48,7 +46,7 @@ ax3_twin = ax3.twinx()
 ax3_twin.plot(data_cum)
 ax3.grid()
 ax3_twin.grid()
-plotter.align_y_axes_on_values([ax3, ax3_twin])
+ngp.align_y_axes_on_values([ax3, ax3_twin])
 ax3.set_title("Specific alignment with no values")
 
 plotter.fig  # to display the figure inline

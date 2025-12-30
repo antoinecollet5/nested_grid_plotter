@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Antoine COLLET
 """
 Test the NestedGridPlotter base class.
 
@@ -542,11 +544,11 @@ def test_axis_and_fig_add_legend():
     for ax_name, ax in plotter.ax_dict.items():
         # Handles
         if Version(mpl.__version__) >= Version("3.7"):
-            assert len(ax.legend_.legend_handles) == 3
+            assert len(ax.legend_.legend_handles) == 3  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
         else:
-            assert len(ax.legend_.legendHandles) == 3
+            assert len(ax.legend_.legendHandles) == 3  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
         # Labels
-        assert [t._text for t in ax.legend_.texts] == [
+        assert [t._text for t in ax.legend_.texts] == [  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
             f"linear {ax_name}",
             f"quadratic {ax_name}",
             f"cubic {ax_name}",
@@ -555,15 +557,15 @@ def test_axis_and_fig_add_legend():
     # Test fig legend
     plotter.add_fig_legend(fontsize=10, ncol=2)
     assert len(plotter.fig.legends) == 1
-    all_labels = [t._text for ax in plotter.axes for t in ax.legend_.texts]
-    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(all_labels)
+    all_labels = [t._text for ax in plotter.axes for t in ax.legend_.texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(all_labels)  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
 
 
 def test_add_fig_legend_with_duplicated_labels_among_axes():
     # Test fig legend with common labels
     plotter = generate_legend_test_figure_common_items()
     plotter.add_fig_legend(fontsize=10)
-    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(
+    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
         [
             "the common linear legend item",
             "the common quadratic legend item",
@@ -599,8 +601,8 @@ def test_add_additional_legend_item():
     plotter.add_axis_legend("lt1")
     plotter.add_fig_legend(fontsize=10, ncol=2)
 
-    ax_labels = [t._text for t in plotter.ax_dict["lt1"].legend_.texts]
-    fig_labels = [t._text for t in plotter.fig.legends[0].texts]
+    ax_labels = [t._text for t in plotter.ax_dict["lt1"].legend_.texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+    fig_labels = [t._text for t in plotter.fig.legends[0].texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
 
     assert ax_labels[-1] == "My extra legend item"
     assert fig_labels[-1] == "My extra legend item"

@@ -5,7 +5,7 @@
 import copy
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -364,7 +364,7 @@ class AnimatedPlotter(NestedGridPlotter):
             # color
             c = val.get("c")
             # Check color array size (LineCollection still works, but values are unused)
-            if c is not None:
+            if c is not None and x is not None:
                 if len(c) != len(x) - 1:
                     warnings.warn(
                         "The c argument should have a length one less than the "
@@ -506,7 +506,7 @@ class AnimatedPlotter(NestedGridPlotter):
         # The results are stored in plot_dict and allow updating the values.
         plot_dict = {}
 
-        def _get_segments(_x: NDArrayFloat, _y: NDArrayFloat) -> Sequence[NDArrayFloat]:
+        def _get_segments(_x: NDArrayFloat, _y: NDArrayFloat) -> NDArrayFloat:
             points = np.array([_x, _y]).T.reshape(-1, 1, 2)
             return np.concatenate([points[:-1], points[1:]], axis=1)
 
@@ -536,15 +536,16 @@ class AnimatedPlotter(NestedGridPlotter):
             # color
             c = val.get("c")
             # Check color array size (LineCollection still works, but values are unused)
-            if len(c) != len(x) - 1:
-                warnings.warn(
-                    "The c argument should have a length one less than the length "
-                    "of x and y. "
-                    "If it has the same length, use the colored_line function instead."
-                )
+            if c is not None and x is not None:
+                if len(c) != len(x) - 1:
+                    warnings.warn(
+                        "The c argument should have a length one less than the length "
+                        "of x and y. If it has the same length, use the colored"
+                        "_line function instead."
+                    )
 
             # Add the line collection
-            lc = LineCollection(_get_segments(x_extend, y_extend), **kwargs)
+            lc = LineCollection(segments=_get_segments(x_extend, y_extend), **kwargs)
             # Set the values used for colormapping
             lc.set_array(c)
             ax.add_collection(lc)
@@ -618,7 +619,7 @@ class AnimatedPlotter(NestedGridPlotter):
 
     def animated_multi_imshow(
         self,
-        ax_names: Iterable[str],
+        ax_names: Sequence[str],
         data: Dict[str, NDArrayFloat],
         fig: Optional[Union[Figure, SubFigure]] = None,
         nb_frames: Optional[int] = None,

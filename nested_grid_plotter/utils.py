@@ -33,11 +33,11 @@ def object_or_object_sequence_to_list(
 ) -> List[_Object]:
     """Convert a singleton or an iterable of this object to a list of object."""
     if isinstance(_input, Iterable):
-        return [item for item in _input]
+        return [item for item in _input]  # ty: ignore[invalid-return-type]
     return [_input]
 
 
-def get_line_style(line_style_label: str) -> Tuple[float, Tuple[float]]:
+def get_line_style(line_style_label: str) -> Tuple[float, Sequence[int]]:
     """
     Get a parametrized linestyle from a line style label.
 
@@ -57,20 +57,20 @@ def get_line_style(line_style_label: str) -> Tuple[float, Tuple[float]]:
 
     """
     return {
-        "solid": (0, ()),
-        "loosely dotted": (0, (1, 10)),
-        "dotted": (0, (1, 5)),
-        "densely dotted": (0, (1, 1)),
-        "loosely dashed": (0, (5, 10)),
-        "dashed": (0, (5, 5)),
-        "densely dashed": (0, (5, 1)),
-        "loosely dashdotted": (0, (3, 10, 1, 10)),
-        "dashdotted": (0, (3, 5, 1, 5)),
-        "densely dashdotted": (0, (3, 1, 1, 1)),
-        "loosely dashdotdotted": (0, (3, 10, 1, 10, 1, 10)),
-        "dashdotdotted": (0, (3, 5, 1, 5, 1, 5)),
-        "densely dashdotdotted": (0, (3, 1, 1, 1, 1, 1)),
-    }.get(line_style_label, (0, ()))
+        "solid": (0.0, ()),
+        "loosely dotted": (0.0, (1, 10)),
+        "dotted": (0.0, (1, 5)),
+        "densely dotted": (0.0, (1, 1)),
+        "loosely dashed": (0.0, (5, 10)),
+        "dashed": (0.0, (5, 5)),
+        "densely dashed": (0.0, (5, 1)),
+        "loosely dashdotted": (0.0, (3, 10, 1, 10)),
+        "dashdotted": (0.0, (3, 5, 1, 5)),
+        "densely dashdotted": (0.0, (3, 1, 1, 1)),
+        "loosely dashdotdotted": (0.0, (3, 10, 1, 10, 1, 10)),
+        "dashdotdotted": (0.0, (3, 5, 1, 5, 1, 5)),
+        "densely dashdotdotted": (0.0, (3, 1, 1, 1, 1, 1)),
+    }.get(line_style_label, (0.0, tuple()))
 
 
 def make_patch_spines_invisible(ax: Axes) -> None:
@@ -152,14 +152,17 @@ def extract_frames_from_embedded_html_animation(
         if frame_format == r"svg+xml":
             frame_format = "svg"
         path = _target_path.joinpath(
-            f"frame{int(res.get('frame_index')) + start_index:0>7d}.{frame_format}"
+            f"frame{int(res.get('frame_index', np.inf)) + start_index:0>7d}"
+            f".{frame_format}"
         )
         if frame_format == "svg":
             path.write_text(
-                base64.b64decode(res.get("content").encode("utf-8")).decode("utf-8")
+                base64.b64decode(
+                    res.get("content", "").encode(encoding="utf-8")
+                ).decode("utf-8")
             )
         else:
-            base64_img_bytes = res.get("content").encode("utf-8")
+            base64_img_bytes = res.get("content", "").encode(encoding="utf-8")
             path.write_bytes(base64.decodebytes(base64_img_bytes))
 
 
@@ -679,7 +682,8 @@ def _make_axes_symmetric_zero_centered(
 
 
 def make_x_axes_symmetric_zero_centered(
-    axes: Union[Axes, List[Axes]], min_xlims: Optional[Union[float, List[float]]] = None
+    axes: Union[_AxesBase, List[_AxesBase]],
+    min_xlims: Optional[Union[float, List[float]]] = None,
 ) -> None:
     """
     Make x-axis symmetric in zero for all provided axes
@@ -688,7 +692,7 @@ def make_x_axes_symmetric_zero_centered(
 
     Parameters
     ----------
-    axes : Union[Axes, List[Axes]]
+    axes : Union[_AxesBase, List[_AxesBase]]
         Axis or list of axes to adjust.
     min_xlims: Optional[Union[float, List[float]]]
 
@@ -870,9 +874,9 @@ def add_twin_axis_as_datetime(
         ax2.set_xbound(*ax.get_xbound())
 
     if is_y_axis:
-        ax2.yaxis.set_ticks_position(position)
+        ax2.yaxis.set_ticks_position(position)  # ty: ignore[invalid-argument-type]
     else:
-        ax2.xaxis.set_ticks_position(position)
+        ax2.xaxis.set_ticks_position(position)  # ty: ignore[invalid-argument-type]
 
     # Apply a shift
     ax2.spines[position].set_position(("outward", spine_outward_position))
