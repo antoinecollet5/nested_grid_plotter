@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Antoine COLLET
 """Get the metadata."""
 
 __version__: str = "2.0.0"

@@ -2,14 +2,49 @@
 About Nested Grid Plotter
 =========================
 
-|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: Ruff| |Ruff| |DOI|
+|License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: Ruff| |Ruff| |ty| |DOI|
 
 NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intends to simplify the plotting of nestedgrid by providing a objected oriented class.
 
 * Documentation: https://nested-grid-plotter.readthedocs.io.
 
-.. |License| image:: https://img.shields.io/badge/License-MIT license-blue.svg
-    :target: https://github.com/antoinecollet5/nested_grid_plotter/-/blob/master/LICENSE
+===========
+🔑 License
+===========
+
+This project is released under the **BSD 3-Clause License**.
+
+Copyright (c) 2025, Antoine COLLET. All rights reserved.
+
+For more details, see the `LICENSE <https://github.com/antoinecollet5/lbfgsb/blob/master/LICENSE>`_ file included in this repository.
+
+==============
+⚠️ Disclaimer
+==============
+
+This software is provided "as is", without warranty of any kind, express or implied,
+including but not limited to the warranties of merchantability, fitness for a particular purpose,
+or non-infringement. In no event shall the authors or copyright holders be liable for
+any claim, damages, or other liability, whether in an action of contract, tort,
+or otherwise, arising from, out of, or in connection with the software or the use
+or other dealings in the software.
+
+By using this software, you agree to accept full responsibility for any consequences,
+and you waive any claims against the authors or contributors.
+
+==========
+📧 Contact
+==========
+
+For questions, suggestions, or contributions, you can reach out via:
+
+- Email: antoinecollet5@gmail.com
+- GitHub: https://github.com/antoinecollet5/lbfgsb
+
+We welcome contributions!
+
+.. |License| image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
+    :target: https://github.com/antoinecollet5/lbfgsb/blob/master/LICENSE
 
 .. |Stars| image:: https://img.shields.io/github/stars/antoinecollet5/nested_grid_plotter.svg?style=social&label=Star&maxAge=2592000
     :target: https://github.com/antoinecollet5/nested_grid_plotter/stargazers
@@ -53,6 +88,10 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 .. |Ruff| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
     :target: https://github.com/astral-sh/ruff
     :alt: Ruff
+
+.. |ty| image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json
+    :target: https://github.com/astral-sh/ty
+    :alt: Checked with ty
 
 .. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8215056.svg
    :target: https://doi.org/10.5281/zenodo.8215056

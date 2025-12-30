@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=42,<=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -15,7 +15,7 @@ keywords = [
     "nested grid",
     "animation",
 ]
-license = { text = "MIT license" }
+license = { file = "LICENSE" }
 dependencies = [
     "setuptools>=61.1.1",
     "wheel",
@@ -132,7 +132,3 @@ target-version = "py311"
 # Format style used to check logging format string. `old` means using %
 # formatting, `new` is for `{}` formatting,and `fstr` is for f-strings.
 logging-format-style = "fstr"
-
-[tool.pytest]
-addopts = "tests/ --doctest-modules --cov=./mpu --cov-append --cov-report html:tests/reports/coverage-html --cov-report xml:tests/reports/coverage.xml --pep8 --ignore=docs/"
-doctest_encoding = "utf-8"
