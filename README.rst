@@ -16,7 +16,7 @@ This project is released under the **BSD 3-Clause License**.
 
 Copyright (c) 2025, Antoine COLLET. All rights reserved.
 
-For more details, see the `LICENSE <https://github.com/antoinecollet5/lbfgsb/blob/master/LICENSE>`_ file included in this repository.
+For more details, see the `LICENSE <https://github.com/antoinecollet5/nested_grid_plotter/blob/master/LICENSE>`_ file included in this repository.
 
 ==============
 ⚠️ Disclaimer
@@ -39,12 +39,12 @@ and you waive any claims against the authors or contributors.
 For questions, suggestions, or contributions, you can reach out via:
 
 - Email: antoinecollet5@gmail.com
-- GitHub: https://github.com/antoinecollet5/lbfgsb
+- GitHub: https://github.com/antoinecollet5/nested_grid_plotter
 
 We welcome contributions!
 
 .. |License| image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
-    :target: https://github.com/antoinecollet5/lbfgsb/blob/master/LICENSE
+    :target: https://github.com/antoinecollet5/nested_grid_plotter/blob/master/LICENSE
 
 .. |Stars| image:: https://img.shields.io/github/stars/antoinecollet5/nested_grid_plotter.svg?style=social&label=Star&maxAge=2592000
     :target: https://github.com/antoinecollet5/nested_grid_plotter/stargazers
