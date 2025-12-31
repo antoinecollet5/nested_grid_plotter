@@ -14,7 +14,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 
 This project is released under the **BSD 3-Clause License**.
 
-Copyright (c) 2025, Antoine COLLET. All rights reserved.
+Copyright (c) 2026, Antoine COLLET. All rights reserved.
 
 For more details, see the `LICENSE <https://github.com/antoinecollet5/nested_grid_plotter/blob/master/LICENSE>`_ file included in this repository.
 

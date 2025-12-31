@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Antoine COLLET
+# Copyright (c) 2026 Antoine COLLET
 """Provide some tools for 2D plots."""
 
 import copy

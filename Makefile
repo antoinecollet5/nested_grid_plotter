@@ -44,14 +44,14 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
+	rm -rf ./.tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
 clean-lint: ## remove mypy and ruff caches
-	rm -fr .mypy_cache
-	rm -fr .ruff_cache
+	rm -rf .mypy_cache
+	rm -rf .ruff_cache
 
 lint: ## check style with flake8
 	ruff check nested_grid_plotter tests

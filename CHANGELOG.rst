@@ -2,6 +2,28 @@
 Changelog
 ==============
 
+2.0.0 (2026-01-01)
+------------------
+
+* IMP: support for numpy>2 and python up to 3.14.
+* IMP: update the packaging system (pyproject.toml).
+* DOCS: better docstring and documentations
+* IMP: support for nested subfigures and subsequent revision of the initializer
+  interface. The `__init__` method of `NestedGridPlotter` and child classes now takes
+  two arguments of types Figure and Builder. `SubfigsBuilder`,
+  `SubplotsMosaicBuilder` for more flexibility, code linting and auto-completion
+  as well as improved documentation. The tutorials and tests have been updated.
+* IMP: deprecation of plotter's `subfigs` attribute which is replaced by
+  `grouped_sf_dict` and the flatten version `sf_dict`.
+* TESTS: use of `pre-commit`, `ruff` and `ty` for linting, type checking and formatting.
+* ENH: add a `Plotter` alias for `NestedGridPlotter`.
+* ENH: add a `axes_names` properties for `Plotter`.
+* FIX: when saving a figure, make sure that if a fig legend as been added, it won't be cutoff by the figure box
+* ENH: add a `add_axis_legend_outside_frame` method to `Plotter`.
+* FIX: in `multi_imshow`,  make sure that the largest image is displayed last (just in case sharex or sharey is active) to avoid shrinking the image.
+* ENH: in `AnimatedPlotter` class, add a `save_animation` method that correctly handles legends.
+* ENH: in `AnimatedPlotter` class, add a `animated_colored_line_between_pts` method.
+
 1.2.0 (2024-06-12)
 ------------------
 
