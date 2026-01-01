@@ -307,6 +307,43 @@ def test_1D_exceptions_6() -> None:
         )
 
 
+@pytest.mark.filterwarnings("error")
+def test_1D_warning_as_error() -> None:
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
+
+    with pytest.raises(
+        UserWarning,
+        match=re.escape(
+            "The c argument should have a length one less than the length of "
+            "x and y. If it has the same length, use the colored_line function instead."
+        ),
+    ):
+        plotter.animated_multi_plot(
+            ax_name="ax1-1",
+            data={
+                "curve1": {
+                    "x": np.ones(5),
+                    "y": np.ones((5, 10)),
+                    "c": np.ones((5, 10)),
+                },
+                "curve2": {"x": np.ones(5), "y": np.ones((5, 10))},
+            },
+        )
+
+    # no warning
+    plotter.animated_multi_plot(
+        ax_name="ax1-1",
+        data={
+            "curve1": {
+                "x": np.ones(5),
+                "y": np.ones((5, 10)),
+                "c": np.ones((4, 10)),
+            },
+            "curve2": {"x": np.ones(5), "y": np.ones((5, 10))},
+        },
+    )
+
+
 @pytest.mark.parametrize(
     "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel,expected_warnings",
     [
