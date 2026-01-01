@@ -12,7 +12,7 @@ Types of Contributions
 ----------------------
 
 Reporting Bugs and Defects
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A defect is any variance between the actual and expected behavior. This includes bugs in the code, issues in the documentation, or problems with visualizations.
 
@@ -90,7 +90,7 @@ After approval, a maintainer will merge it.
 Thank you very much for your contribution and for helping improve nested_grid_plotter!
 
 Setting Up nested_grid_plotter for Local Development
----------------------------------------
+----------------------------------------------------
 
 Ready to contribute? Here’s how to set up `nested_grid_plotter` for local development.
 

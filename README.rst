@@ -4,11 +4,114 @@ About Nested Grid Plotter
 
 |License| |Stars| |Python| |PyPI| |Downloads| |Build Status| |Documentation Status| |Coverage| |Codacy| |Precommit: enabled| |Code style: Ruff| |Ruff| |ty| |DOI|
 
+🚀 Quick start
+===============
+
+To install nested-grid-plotter functionality, see the :ref:`installation instructions<installation_ref>`.
+
+For a deep overview of nested-grid-plotter functionality, see the :ref:`user guide<user_guide_ref>`.
+
+You can also refer to the :ref:`API reference guide<api_reference_ref>` for an exhaustive
+list of all what is possible with nested-grid-plotter.
+
+
+🎯 Motivations
+===============
+
 NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intends to simplify the plotting of nestedgrid by providing a objected oriented class.
 
-* Documentation: https://nested-grid-plotter.readthedocs.io.
+.. code-block:: python
 
-===========
+    import nested_grid_plotter as ngp
+
+    plotter = ngp.NestedGridPlotter(
+        ngp.Figure(
+            constrained_layout=True,  # Always use this to prevent overlappings
+            figsize=(10, 5),
+        ),
+        builder=ngp.SubfigsBuilder(
+            nrows=1,
+            ncols=2,
+            sub_builders={
+                "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["lt1", "lt1"], ["lb1", "rb1"]],
+                    gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
+                    sharey=False,
+                ),
+                "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["l2", "rt2"], ["l2", "bt2"]],
+                    gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
+                    sharey=False,
+                ),
+            },
+        ),
+    )
+    plotter.identify_axes()  # Helper to add the name of the axis on the plot
+    plotter.fig
+
+.. figure:: _static/nested_grid.png
+   :alt: nested_grid
+   :width: 100%
+   :align: center
+
+   Example of figure with nested figures and axes built using `nested_grid_plotter`.
+
+It provide multiple utilities such as grid alignment:
+
+.. figure:: _static/alignment.png
+   :alt: alignment
+   :width: 100%
+   :align: center
+
+   Example of grid ticks alignment made easy thanks to `nested_grid_plotter`.
+
+As well as wrapper for complex plots and animations.
+
+.. figure:: _static/animation_example.gif
+   :alt: animation_example
+   :width: 100%
+   :align: center
+
+   Example of complex animation built using `nested_grid_plotter`.
+
+
+It also allows to make legend positioning and gathering flexible and simpler with some automatic placement solvers:
+
+.. figure:: _static/complex_legend.png
+   :alt: complex_legend
+   :width: 100%
+   :align: center
+
+   Example of figure with semi-automatic legend placement to avoid overlappings with axis labels and plots.
+
+**The complete and up to date documentation can be found here**: https://nested_grid_plotter.readthedocs.io.
+
+In addition to simplifying the matplotlib workflow, our focus are:
+
+- To provide understandable, modern code using the high-level language python, while using typing, explicit function names and standardized formatting thanks to `Ruff <https://docs.astral.sh/ruff/>`_ and `ty <https://docs.astral.sh/ty/>`_;
+- To provide detailed and explicit documentation;
+- To offer totally free code, including for commercial use, thanks to the **BSD 3-Clause License**;
+
+🖋️ How to cite
+==============
+
+If you use this piece of software in your work, please cite it as:
+
+.. code-block::
+
+    Collet, A. (2026). NestedGridPlotter - A matplotlib wrapper for nested grids and some more.
+    Zenodo. DOI: `10.5281/zenodo.8215056` https://doi.org/10.5281/zenodo.8215056
+
+📧 Contact
+==========
+
+For questions, suggestions, or contributions, you can reach out via:
+
+- Email: antoinecollet5@gmail.com
+- GitHub: https://github.com/antoinecollet5/nested_grid_plotter
+
+We welcome contributions!
+
 🔑 License
 ===========
 
@@ -18,7 +121,6 @@ Copyright (c) 2026, Antoine COLLET. All rights reserved.
 
 For more details, see the `LICENSE <https://github.com/antoinecollet5/nested_grid_plotter/blob/master/LICENSE>`_ file included in this repository.
 
-==============
 ⚠️ Disclaimer
 ==============
 
@@ -32,16 +134,6 @@ or other dealings in the software.
 By using this software, you agree to accept full responsibility for any consequences,
 and you waive any claims against the authors or contributors.
 
-==========
-📧 Contact
-==========
-
-For questions, suggestions, or contributions, you can reach out via:
-
-- Email: antoinecollet5@gmail.com
-- GitHub: https://github.com/antoinecollet5/nested_grid_plotter
-
-We welcome contributions!
 
 .. |License| image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
     :target: https://github.com/antoinecollet5/nested_grid_plotter/blob/master/LICENSE

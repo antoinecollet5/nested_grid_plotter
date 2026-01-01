@@ -356,29 +356,14 @@ class Plotter:
 
         Parameters
         ----------
-        fig_params: Dict[str, Any]
-            Parameters for :class:`matplotlib.figure.Figure`.
-        subfigs_params: Dict[str, Any]
-            Parameters for :meth:`matplotlib.figure.Figure.subfigures`.
-        subplots_mosaic_params: Dict[str, Dict[str, Any]]
-            Parameters for the subplots in the subfigures.
-            (See :func:`matplotlib.pyplot.subplot_mosaic`).
+        fig: Optional[Figure]
+            Figure for the plot. One can either use `matplotlib.pyplot.figure(...)` or
+            `matplotlib.figure.Figure`. If None, `matplotlib.pyplot.figure(...)`
+            is used. The default is None.
+        builder: Optional[NestedBuilder]
+            Builder to populate the figure with subfgures and axes. See
+            :class:`SubfigsBuilder`_ and :class:`SubplotsMosaicBuilder`_.
 
-            .. code-block:: python
-              :linenos:
-              :caption: Example
-
-                                subplots_mosaic_params = {
-                                    "unique": dict(
-                                        mosaic=[
-                                            ["ax11", "ax12", "ax13", "ax14"],
-                                            ["ax21", "ax22", "ax23", "ax24"],
-                                            ["ax31", "ax32", "ax33", "ax34"],
-                                        ],
-                                        sharey=True,
-                                        sharex=True,
-                                    )
-                                }
 
         Attributes
         ----------
@@ -390,26 +375,6 @@ class Plotter:
             Nested dict, first level with subfigures names and second with
             axes names.
 
-        Example
-        -------
-        .. code-block:: python
-                          import nested_grid_plotter as ngp
-
-                          plotter = ngp.NestedGridPlotter(
-                              ngp.Figure(constrained_layout=True, figsize=(18, 14)),
-                              subplots_mosaic_params={
-                                  "fig0": dict(
-                                      mosaic=[
-                                          ["ax1-1", "ax1-2"],
-                                          ["ax2-1", "ax2-2"],
-                                          ["ax3-1", "ax3-2"],
-                                          ["ax4-1", "ax4-2"],
-                                      ],
-                                      sharey=False,
-                                      sharex=True,
-                                  )
-                              },
-                          )
         """
         if fig is None:
             self.fig: Figure = plt.figure(constrained_layout=True)
