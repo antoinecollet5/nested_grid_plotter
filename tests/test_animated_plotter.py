@@ -193,7 +193,12 @@ def test_animated_multi_plot(tmp_folder) -> None:
     fname_html: Path = tmp_folder.joinpath("test1D.html")
     writer: HTMLWriter = HTMLWriter(fps=20, embed_frames=True)
     writer.frame_format = "svg"  # Ensure svg format
-    plotter.animation.save(fname_html, writer=writer)
+    plotter.save_animation(fname_html, writer=writer)
+
+    # try again with no engine
+    plotter.fig.set_layout_engine(None)
+    # add savefig_kwargs just for the coverage
+    plotter.save_animation(fname_html, writer=writer, savefig_kwargs={})
 
 
 def test_multi_plot_x_vector_exception() -> None:
@@ -384,7 +389,7 @@ def test_animated_multi_imshow(
     fname_html: Path = tmp_folder.joinpath("test2D.html")
     writer: HTMLWriter = HTMLWriter(fps=20, embed_frames=True)
     writer.frame_format = "svg"  # Ensure svg format
-    plotter.animation.save(fname_html, writer=writer)
+    plotter.save_animation(fname_html, writer=writer)
 
 
 def test_animated_multi_imshow_nb_steps_exception() -> None:

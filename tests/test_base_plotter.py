@@ -100,6 +100,13 @@ def test_make_kwargs_retrocompatible() -> None:
             ),
         )
 
+    _make_kwargs_retrocompatible(
+        "3.6",
+        ngp.SubplotsMosaicBuilder(
+            mosaic=[["A panel", "A panel", "edge"], ["C panel", ".", "edge"]],
+        ),
+    )
+
 
 @pytest.fixture
 def tmp_folder(tmp_path_factory):
