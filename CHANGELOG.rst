@@ -22,7 +22,6 @@ Changelog
 * ENH: add a `add_axis_legend_outside_frame` method to `Plotter`.
 * FIX: in `multi_imshow`,  make sure that the largest image is displayed last (just in case sharex or sharey is active) to avoid shrinking the image.
 * ENH: in `AnimatedPlotter` class, add a `save_animation` method that correctly handles legends.
-* ENH: in `AnimatedPlotter` class, add a `animated_colored_line_between_pts` method.
 
 1.2.0 (2024-06-12)
 ------------------
