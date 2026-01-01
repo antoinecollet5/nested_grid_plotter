@@ -64,7 +64,7 @@ def test_get_nb_frames(
 
 def make_2_frames_plotter() -> ngp.AnimatedPlotter:
     return ngp.AnimatedPlotter(
-        ngp.Figure(figsize=(10, 5)),
+        ngp.Figure(figsize=(10, 5), constrained_layout=True),
         builder=ngp.SubplotsMosaicBuilder(
             mosaic=[["ax11", "ax12"]], sharey=True, sharex=True
         ),
@@ -196,7 +196,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
     plotter.save_animation(fname_html, writer=writer)
 
     # try again with no engine
-    plotter.fig.set_layout_engine(None)
+    plotter.fig._layout_engine = None  # ty: ignore
     # add savefig_kwargs just for the coverage
     plotter.save_animation(fname_html, writer=writer, savefig_kwargs={})
 

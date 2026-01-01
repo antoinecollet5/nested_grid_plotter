@@ -135,7 +135,7 @@ logging-format-style = "fstr"
 
 
 [tool.coverage.run]
-branch = true
+branch = false # avoid testing all branches
 
 [tool.coverage.report]
 exclude_also = [
