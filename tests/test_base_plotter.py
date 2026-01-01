@@ -9,6 +9,7 @@ follow the same order. The
 @author: Antoine COLLET
 """
 
+import re
 import struct
 from contextlib import nullcontext as does_not_raise
 from itertools import product
@@ -20,6 +21,7 @@ import pytest
 from matplotlib.axes import Axes
 from matplotlib.figure import SubFigure
 from matplotlib.lines import Line2D
+from nested_grid_plotter.base_plotter import _make_kwargs_retrocompatible
 from packaging.version import Version
 
 
@@ -74,6 +76,25 @@ def test_SubplotsMosaicBuilder(
             gridspec_kw=gridspec_kw,
             width_ratios=width_ratios,
             height_ratios=height_ratios,
+        )
+
+
+@pytest.mark.filterwarnings("error")
+def test_make_kwargs_retrocompatible() -> None:
+    with pytest.raises(
+        UserWarning,
+        match=re.escape(
+            'Parameter "per_subplot_kw" is supported from matplotlib 3.7 '
+            "while you use version 3.6 and it is consequently "
+            "ignored."
+        ),
+    ):
+        _make_kwargs_retrocompatible(
+            "3.6",
+            ngp.SubplotsMosaicBuilder(
+                mosaic=[["A panel", "A panel", "edge"], ["C panel", ".", "edge"]],
+                per_subplot_kw={},
+            ),
         )
 
 
