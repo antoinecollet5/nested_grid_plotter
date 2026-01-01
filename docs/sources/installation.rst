@@ -33,17 +33,11 @@ You can either clone the public repository:
 
     $ git clone git://github.com/antoinecollet5/nested_grid_plotter
 
-Or download the `tarball`_:
-
-.. code-block:: console
-
-    $ curl -OJL https://github.com/antoinecollet5/nested_grid_plotter/tarball/master
-
 Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ python setup.py install
+    $ pip install -e .[all]
 
 
 Tutorials
