@@ -554,7 +554,7 @@ class Plotter:
             {"bbox_extra_artists": tuple(self._get_bbox_extra_artists(kwargs))}
         )
         if len(kwargs["bbox_extra_artists"]) != 0:
-            if Version(platform.python_version()) < Version("3.8"):
+            if Version(platform.python_version()) < Version("3.8"):  # pragma: no cover
                 warnings.warn(
                     "There are bbox extra artists to save but this is not"
                     " supported for python 3.7. Please use python 3.8 or above. "

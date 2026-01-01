@@ -395,6 +395,10 @@ def test_savefig(tmp_path_factory) -> None:
     plotter.savefig(tmp_folder.joinpath("test_fig"))
 
 
+def test_plotter_get_bbox_extra_artists_no_kwargs() -> None:
+    assert ngp.NestedGridPlotter()._get_bbox_extra_artists() is not None
+
+
 def test_savefif_with_legend(tmp_path_factory) -> None:
     tmp_folder = tmp_path_factory.mktemp("data")
 
@@ -605,7 +609,8 @@ def generate_legend_test_figure_common_items() -> ngp.NestedGridPlotter:
     return _plotter
 
 
-def test_axis_and_fig_add_legend():
+@pytest.mark.parametrize("is_outside_frame", (False, True))
+def test_axis_and_fig_add_legend(is_outside_frame: bool):
     plotter = generate_legend_test_figure()
 
     # Test that there are no legend on any axes / figure
@@ -618,7 +623,10 @@ def test_axis_and_fig_add_legend():
 
     # Add some legends and test that it has been correctly added
     for ax_name in plotter.ax_dict.keys():
-        plotter.add_axis_legend(ax_name, fontsize=10)
+        if is_outside_frame:
+            plotter.add_axis_legend_outside_frame(ax_name, fontsize=10)
+        else:
+            plotter.add_axis_legend(ax_name, fontsize=10)
     for ax_name, ax in plotter.ax_dict.items():
         # Handles
         if Version(mpl.__version__) >= Version("3.7"):
