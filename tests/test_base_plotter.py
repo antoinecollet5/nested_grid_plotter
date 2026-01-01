@@ -23,6 +23,60 @@ from matplotlib.lines import Line2D
 from packaging.version import Version
 
 
+@pytest.mark.parametrize(
+    "gridspec_kw, width_ratios, height_ratios, expected_exception",
+    (
+        ({}, None, None, does_not_raise()),
+        (
+            dict(width_ratios=[1, 1, 1], height_ratios=[1, 1, 1]),
+            None,
+            None,
+            does_not_raise(),
+        ),
+        (
+            dict(),
+            [1, 1, 1],
+            [1, 1, 1],
+            does_not_raise(),
+        ),
+        (
+            dict(width_ratios=[1, 1, 1], height_ratios=[1, 1, 1]),
+            [1, 1, 1],
+            None,
+            pytest.raises(
+                ValueError,
+                match=(
+                    "'width_ratios' must not be defined both as parameter and as "
+                    "key in 'gridspec_kw'"
+                ),
+            ),
+        ),
+        (
+            dict(width_ratios=[1, 1, 1], height_ratios=[1, 1, 1]),
+            None,
+            [1, 1, 1],
+            pytest.raises(
+                ValueError,
+                match=(
+                    "'height_ratios' must not be defined both as parameter and as "
+                    "key in 'gridspec_kw'"
+                ),
+            ),
+        ),
+    ),
+)
+def test_SubplotsMosaicBuilder(
+    gridspec_kw, width_ratios, height_ratios, expected_exception
+) -> None:
+    with expected_exception:
+        ngp.SubplotsMosaicBuilder(
+            mosaic=[["A panel", "A panel", "edge"], ["C panel", ".", "edge"]],
+            gridspec_kw=gridspec_kw,
+            width_ratios=width_ratios,
+            height_ratios=height_ratios,
+        )
+
+
 @pytest.fixture
 def tmp_folder(tmp_path_factory):
     """Create a temporary directory"""
@@ -117,6 +171,9 @@ def test_unique_subfig_with_mosaic():
     ]
     plotter.identify_axes()  # Helper to add the name of the axis on the plot
     # plt.show()
+
+    # Get the attribute
+    plotter.axes_names
 
 
 def test_multiple_subfigs_1_row_with_mosaic():
