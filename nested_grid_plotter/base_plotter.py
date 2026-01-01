@@ -156,11 +156,6 @@ class SubplotsMosaicBuilder(NestedBuilder):
             it is possible to use a single string instead of a tuple as keys;
             i.e. ``"AB"`` is equivalent to ``("A", "B")``.
 
-            Note
-            ====
-            This parameter was introduced in matplotlib 3.7 and will be ignored when
-            using versions 3.5 or 3.6.
-
         gridspec_kw : dict, optional
             Dictionary with keywords passed to the `.GridSpec` constructor used
             to create the grid the subplots are placed on. In the case of

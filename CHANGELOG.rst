@@ -2,9 +2,10 @@
 Changelog
 ==============
 
-2.0.0 (2026-01-01)
+2.0.0 (2026-01-02)
 ------------------
 
+* IMP: drop support for python 3.7
 * IMP: support for numpy>2 and python up to 3.14.
 * IMP: update the packaging system (pyproject.toml).
 * DOCS: better docstring and documentations
