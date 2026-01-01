@@ -71,6 +71,12 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
+fast-coverage: ## check code coverage quickly with the default Python
+	coverage run --source nested_grid_plotter -m pytest tests
+	coverage report -m
+	coverage html
+	$(BROWSER) htmlcov/index.html
+
 docs: ## generate Sphinx HTML documentation, including API docs
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
