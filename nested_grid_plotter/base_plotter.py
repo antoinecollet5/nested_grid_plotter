@@ -952,10 +952,7 @@ class Plotter:
             dx_lgd = lgd_bbox.xmax - lgd_bbox.xmin
 
             # we must consider the transform (tight or constrained)
-            if engine is not None:
-                den: float = dx_tot - dx_lgd - dx_ax_no_frame
-            else:
-                den = dx_ax - dx_ax_no_frame
+            den: float = dx_tot - dx_lgd - dx_ax_no_frame
 
             if loc in ["left"]:
                 bbox_to_anchor[0] -= (
@@ -977,10 +974,7 @@ class Plotter:
             dy_lgd = lgd_bbox.ymax - lgd_bbox.ymin
 
             # we must consider the transform (tight or constrained)
-            if engine is not None:
-                den = dy_tot - dy_lgd - dy_ax_no_frame
-            else:
-                den = dy_ax
+            den = dy_tot - dy_lgd - dy_ax_no_frame
 
             if loc in ["bottom"]:
                 bbox_to_anchor[1] -= (
@@ -1132,7 +1126,7 @@ def is_lgd_overlapping_axis(ax: Axes, lgd: Legend) -> bool:
     )
     lgd_bbox = lgd.get_tightbbox()
 
-    if ax_bbox is None or lgd_bbox is None:
+    if ax_bbox is None or lgd_bbox is None:  # pragma: no cover
         return False
 
     # take the legend border axespad into account.

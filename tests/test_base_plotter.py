@@ -21,7 +21,10 @@ import pytest
 from matplotlib.axes import Axes
 from matplotlib.figure import SubFigure
 from matplotlib.lines import Line2D
-from nested_grid_plotter.base_plotter import _make_kwargs_retrocompatible
+from nested_grid_plotter.base_plotter import (
+    _make_kwargs_retrocompatible,
+    is_lgd_overlapping_axis,
+)
 from packaging.version import Version
 
 
@@ -105,7 +108,7 @@ def tmp_folder(tmp_path_factory):
 
 
 def test_plotter_without_input_args():
-    plotter = ngp.NestedGridPlotter()
+    plotter = ngp.Plotter()
     assert list(plotter.sf_dict.keys()) == []
     assert list(plotter.grouped_ax_dict.keys()) == ["fig"]
     assert list(plotter.grouped_ax_dict["fig"].keys()) == ["ax1-1"]
@@ -125,7 +128,7 @@ def test_plotter_without_input_args():
 
 
 def test_multiple_subfigs_no_mosaic():
-    plotter = ngp.NestedGridPlotter(
+    plotter = ngp.Plotter(
         ngp.Figure(constrained_layout=True),
         builder=ngp.SubfigsBuilder(nrows=2, ncols=3),
     )
@@ -162,7 +165,7 @@ def test_multiple_subfigs_no_mosaic():
 
 
 def test_unique_subfig_with_mosaic():
-    plotter = ngp.NestedGridPlotter(
+    plotter = ngp.Plotter(
         ngp.Figure(constrained_layout=True),
         builder=ngp.SubfigsBuilder(
             sub_builders={
@@ -198,7 +201,7 @@ def test_unique_subfig_with_mosaic():
 
 
 def test_multiple_subfigs_1_row_with_mosaic():
-    plotter = ngp.NestedGridPlotter(
+    plotter = ngp.Plotter(
         ngp.Figure(constrained_layout=True, figsize=(10, 10)),
         builder=ngp.SubfigsBuilder(
             nrows=1,
@@ -248,7 +251,7 @@ def test_multiple_subfigs_1_row_with_mosaic():
 
 
 def test_multiple_subfigs_2_rows_with_mosaic():
-    plotter = ngp.NestedGridPlotter(
+    plotter = ngp.Plotter(
         ngp.Figure(constrained_layout=True, figsize=(10, 10)),
         builder=ngp.SubfigsBuilder(
             nrows=2,
@@ -311,7 +314,7 @@ def test_less_keys_in_subplots_mosaic_params_than_subfigs():
             "but there are 1 rows and 2 cols, i.e., 2 builders expected!"
         ),
     ):
-        ngp.NestedGridPlotter(
+        ngp.Plotter(
             ngp.Figure(constrained_layout=True, figsize=(10, 10)),
             builder=ngp.SubfigsBuilder(
                 nrows=1,
@@ -327,7 +330,7 @@ def test_less_keys_in_subplots_mosaic_params_than_subfigs():
 
 def test_error_more_keys_in_subplots_mosaic_params_than_subfigs():
     with pytest.raises(Exception):
-        return ngp.NestedGridPlotter(
+        return ngp.Plotter(
             ngp.Figure(constrained_layout=True, figsize=(10, 10)),
             builder=ngp.SubfigsBuilder(
                 nrows=1,
@@ -350,7 +353,7 @@ def test_error_more_keys_in_subplots_mosaic_params_than_subfigs():
 def test_error_same_axis_names_used_in_multiple_subfigures():
     # Test multiple duplicatedaxis names
     with pytest.raises(Exception):
-        return ngp.NestedGridPlotter(
+        return ngp.Plotter(
             builder=ngp.SubfigsBuilder(
                 nrows=1,
                 ncols=2,
@@ -367,7 +370,7 @@ def test_error_same_axis_names_used_in_multiple_subfigures():
 
     # Test single duplicatedaxis name
     with pytest.raises(Exception):
-        return ngp.NestedGridPlotter(
+        return ngp.Plotter(
             ngp.Figure(constrained_layout=True, figsize=(10, 10)),
             builder=ngp.SubfigsBuilder(
                 nrows=1,
@@ -386,7 +389,7 @@ def test_error_same_axis_names_used_in_multiple_subfigures():
 
 def test_savefig(tmp_path_factory) -> None:
     tmp_folder = tmp_path_factory.mktemp("data")
-    plotter = ngp.NestedGridPlotter()
+    plotter = ngp.Plotter()
     ax = plotter.ax_dict["ax1-1"]
     x = np.linspace(0, 2, 100)  # Sample data.
     ax.plot(x, x, label="linear")
@@ -396,7 +399,7 @@ def test_savefig(tmp_path_factory) -> None:
 
 
 def test_plotter_get_bbox_extra_artists_no_kwargs() -> None:
-    assert ngp.NestedGridPlotter()._get_bbox_extra_artists() is not None
+    assert ngp.Plotter()._get_bbox_extra_artists() is not None
 
 
 def test_savefif_with_legend(tmp_path_factory) -> None:
@@ -479,12 +482,12 @@ def test_savefif_with_legend(tmp_path_factory) -> None:
 
 
 def test_close() -> None:
-    plotter = ngp.NestedGridPlotter()
+    plotter = ngp.Plotter()
     plotter.close()
 
 
-def gen_complex_example_fig() -> ngp.NestedGridPlotter:
-    return ngp.NestedGridPlotter(
+def gen_complex_example_fig() -> ngp.Plotter:
+    return ngp.Plotter(
         ngp.Figure(
             constrained_layout=True,  # Always use this to prevent overlappings
             figsize=(15, 6),
@@ -585,7 +588,7 @@ def test_add_grid_to_all_axes_of_the_plot():
 
 
 # Generate a figure and add some data to it
-def generate_legend_test_figure() -> ngp.NestedGridPlotter:
+def generate_legend_test_figure() -> ngp.Plotter:
     _plotter = gen_complex_example_fig()
     x = np.linspace(0, 2, 100)  # Sample data.
     for ax_name, ax in _plotter.ax_dict.items():
@@ -595,7 +598,7 @@ def generate_legend_test_figure() -> ngp.NestedGridPlotter:
     return _plotter
 
 
-def generate_legend_test_figure_common_items() -> ngp.NestedGridPlotter:
+def generate_legend_test_figure_common_items() -> ngp.Plotter:
     _plotter = gen_complex_example_fig()
     x = np.linspace(0, 2, 100)  # Sample data.
     for ax_name, ax in _plotter.ax_dict.items():
@@ -662,7 +665,7 @@ def test_add_fig_legend_with_duplicated_labels_among_axes():
 
 def test_add_fig_legend_with_empty_figure():
     """Empty figure i.e., no data."""
-    plotter = ngp.NestedGridPlotter()
+    plotter = ngp.Plotter()
     plotter.add_fig_legend(fontsize=10)
     assert len(plotter.fig.legends) == 0
 
@@ -775,3 +778,131 @@ def test_clear_all_axes():
 
     assert len(plotter._additional_handles) == 0
     assert len(plotter._additional_labels) == 0
+
+
+def test_add_axis_legend_outside_frame_no_handles():
+    assert ngp.Plotter().add_axis_legend_outside_frame("ax1-1") is None
+
+
+def gen_complex_example_fig2(is_constrained_layout: bool) -> ngp.Plotter:
+    return ngp.Plotter(
+        ngp.Figure(
+            constrained_layout=is_constrained_layout,
+            figsize=(20, 10),
+        ),
+        builder=ngp.SubfigsBuilder(
+            nrows=2,
+            ncols=4,
+            hspace=0.0,
+            width_ratios=[1, 1, 1, 2],
+            sub_builders={
+                "sf1-1": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax1-1"]],
+                ),
+                "sf1-2": ngp.SubplotsMosaicBuilder(mosaic=[["ax1-2"]]),
+                "sf1-3": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax1-3"]],
+                ),
+                "sf1-4": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax1-4"]],
+                ),
+                "sf2-1": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax2-1"]],
+                ),
+                "sf2-2": ngp.SubplotsMosaicBuilder(mosaic=[["ax2-2"]]),
+                "sf2-3": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax2-3"]],
+                ),
+                "sf2-4": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["ax2-4"]],
+                ),
+            },
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    "is_add_bbox_x_y_shifts, is_constrained_layout",
+    (((False, True), (True, True), (False, False))),
+)
+def test_add_axis_legend_outside_frame(
+    is_add_bbox_x_y_shifts: bool, is_constrained_layout: bool
+) -> None:
+    plotter = gen_complex_example_fig2(is_constrained_layout)
+    plotter.identify_axes()
+    x = np.arange(100)
+    for ax_name, ax in plotter.ax_dict.items():
+        for i in range(4):
+            ax.plot(x, np.cumsum(np.random.random(x.size)), label=f"c {i}")
+        ax.set_title(ax_name)
+
+    legends = []
+
+    # Case 1: for lt and lb we add subfigure legend (we use corresponding subfigures)
+    for ax_name, sf_name in zip(["ax1-1", "ax2-1"], ["sf1-1", "sf2-1"]):
+        plotter.ax_dict[ax_name].set_facecolor("none")
+        plotter.ax_dict[ax_name].set_xlabel(
+            "x_label\ntwo levels", bbox={"color": "red"}
+        )
+        lgd = plotter.add_fig_legend(sf_name, ncols=2)
+
+        # here legend overlaps
+        if lgd is not None:  # required for ty type check
+            assert is_lgd_overlapping_axis(plotter.get_axis(ax_name), lgd)
+
+    # Case 2 for rt and rb we add axis legend
+    for ax_name in ["ax1-2", "ax2-2"]:
+        plotter.ax_dict[ax_name].set_facecolor("none")
+        plotter.ax_dict[ax_name].set_xlabel(
+            "x_label\ntwo levels", bbox={"color": "green"}
+        )
+        legends.append(plotter.add_axis_legend_outside_frame(ax_name, ncols=2))
+
+        # here legend does not overlap
+        if is_constrained_layout:
+            assert not is_lgd_overlapping_axis(plotter.get_axis(ax_name), legends[-1])
+
+    for ax_name in ["ax1-3", "ax2-3"]:
+        plotter.ax_dict[ax_name].set_facecolor("none")
+        plotter.ax_dict[ax_name].set_xlabel(
+            "x_label\nthree\nlevels", bbox={"color": "green"}
+        )
+        if is_add_bbox_x_y_shifts:
+            legends.append(
+                plotter.add_axis_legend_outside_frame(
+                    ax_name, ncols=2, loc="top", bbox_x_shift=0.0, bbox_y_shift=0.0
+                )
+            )
+        else:
+            legends.append(
+                plotter.add_axis_legend_outside_frame(ax_name, ncols=2, loc="top")
+            )
+
+        # here legend does not overlap
+        if not is_add_bbox_x_y_shifts and is_constrained_layout:
+            assert not is_lgd_overlapping_axis(plotter.get_axis(ax_name), legends[-1])
+
+    for ax_name, loc in zip(["ax1-4", "ax2-4"], ["right", "left"]):
+        plotter.ax_dict[ax_name].set_facecolor("none")
+        plotter.ax_dict[ax_name].set_xlabel(
+            "x_label \ntwo levels", bbox={"color": "green"}
+        )
+        plotter.ax_dict[ax_name].set_ylabel("y_label", bbox={"color": "green"})
+        if is_add_bbox_x_y_shifts:
+            legends.append(
+                plotter.add_axis_legend_outside_frame(
+                    ax_name, ncols=1, loc=loc, bbox_x_shift=0.0, bbox_y_shift=0.0
+                )
+            )
+        else:
+            legends.append(
+                plotter.add_axis_legend_outside_frame(ax_name, ncols=1, loc=loc)
+            )
+
+        # here legend does not overlap
+        if not is_add_bbox_x_y_shifts and is_constrained_layout:
+            assert not is_lgd_overlapping_axis(plotter.get_axis(ax_name), legends[-1])
+
+    # for sf_name, subfig in plotter.grouped_sf_dict.items():
+    #     plotter.add_fig_legend(sf_name, ncols=2, bbox_y_shift=-0.1)
+    plotter.fig
