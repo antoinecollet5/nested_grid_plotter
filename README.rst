@@ -100,7 +100,7 @@ If you use this piece of software in your work, please cite it as:
 .. code-block::
 
     Collet, A. (2026). NestedGridPlotter - A matplotlib wrapper for nested grids and some more.
-    Zenodo. DOI: `10.5281/zenodo.8215056` https://doi.org/10.5281/zenodo.8215056
+    Zenodo. DOI: `10.5281/zenodo.18121868` https://doi.org/10.5281/zenodo.18121868
 
 📧 Contact
 ==========
@@ -185,5 +185,5 @@ and you waive any claims against the authors or contributors.
     :target: https://github.com/astral-sh/ty
     :alt: Checked with ty
 
-.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.8215056.svg
-   :target: https://doi.org/10.5281/zenodo.8215056
+.. |DOI| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.18121868.svg
+   :target: https://doi.org/10.5281/zenodo.18121868
