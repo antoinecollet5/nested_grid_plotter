@@ -7,11 +7,11 @@ About Nested Grid Plotter
 🚀 Quick start
 ===============
 
-To install nested-grid-plotter functionality, see the :ref:`installation instructions<installation_ref>`.
+To install nested-grid-plotter functionality, see the `installation instructions <https://nested-grid-plotter.readthedocs.io/en/latest/installation.html>`_.
 
-For a deep overview of nested-grid-plotter functionality, see the :ref:`user guide<user_guide_ref>`.
+For a deep overview of nested-grid-plotter functionality, see the `user guide <https://nested-grid-plotter.readthedocs.io/en/latest/user_guide.html>`_.
 
-You can also refer to the :ref:`API reference guide<api_reference_ref>` for an exhaustive
+You can also refer to the `API reference guide <https://nested-grid-plotter.readthedocs.io/en/latest/api_reference.html>`_ for an exhaustive
 list of all what is possible with nested-grid-plotter.
 
 
@@ -54,7 +54,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
    :width: 100%
    :align: center
 
-   Example of figure with nested figures and axes built using `nested_grid_plotter`.
+   Example of figure with nested figures and axes built using `nested_grid_plotter <https://nested-grid-plotter.readthedocs.io>`_.
 
 It provide multiple utilities such as grid alignment:
 
@@ -63,7 +63,7 @@ It provide multiple utilities such as grid alignment:
    :width: 100%
    :align: center
 
-   Example of grid ticks alignment made easy thanks to `nested_grid_plotter`.
+   Example of grid ticks alignment made easy thanks to `nested_grid_plotter <https://nested-grid-plotter.readthedocs.io>`_.
 
 As well as wrapper for complex plots and animations.
 
@@ -72,7 +72,7 @@ As well as wrapper for complex plots and animations.
    :width: 100%
    :align: center
 
-   Example of complex animation built using `nested_grid_plotter`.
+   Example of complex animation built using `nested_grid_plotter <https://nested-grid-plotter.readthedocs.io>`_.
 
 
 It also allows to make legend positioning and gathering flexible and simpler with some automatic placement solvers:
