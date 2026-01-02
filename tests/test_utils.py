@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """
 Test the utilities.
 
@@ -6,6 +8,7 @@ follow the same order.
 
 @author: Antoine COLLET
 """
+
 import re
 from datetime import datetime
 from pathlib import Path
@@ -13,13 +16,12 @@ from typing import List
 
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+import nested_grid_plotter as ngp
 import numpy as np
 import pytest
 from dateutil.relativedelta import relativedelta
 from matplotlib.animation import HTMLWriter
 from matplotlib.axes import Axes  # Just for liting
-
-import nested_grid_plotter as ngp
 
 
 @pytest.fixture
@@ -32,7 +34,7 @@ def test_get_line_style() -> None:
     ngp.get_line_style("solid")
 
 
-def create_animation() -> animation:
+def create_animation() -> animation.FuncAnimation:
     fig, ax = plt.subplots()
 
     x = np.arange(0, 2 * np.pi, 0.01)
@@ -98,23 +100,26 @@ def test_replace_bad_path_characters(test_input, repchar, expected):
 
 def gen_complex_example_fig() -> ngp.NestedGridPlotter:
     return ngp.NestedGridPlotter(
-        fig_params={
-            "constrained_layout": True,  # Always use this to prevent overlappings
-            "figsize": (15, 10),
-        },
-        subfigs_params={"nrows": 1, "ncols": 2},
-        subplots_mosaic_params={
-            "the_left_sub_figure": dict(
-                mosaic=[["lt1", "lt1"], ["lb1", "rb1"]],
-                gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
-                sharey=False,
-            ),
-            "the_right_sub_figure": dict(
-                mosaic=[["l2", "rt2"], ["l2", "bt2"]],
-                gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
-                sharey=False,
-            ),
-        },
+        ngp.Figure(
+            constrained_layout=True,  # Always use this to prevent overlappings
+            figsize=(15, 6),
+        ),
+        builder=ngp.SubfigsBuilder(
+            nrows=1,
+            ncols=2,
+            sub_builders={
+                "the_left_sub_figure": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["lt1", "lt1"], ["lb1", "rb1"]],
+                    gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
+                    sharey=False,
+                ),
+                "the_right_sub_figure": ngp.SubplotsMosaicBuilder(
+                    mosaic=[["l2", "rt2"], ["l2", "bt2"]],
+                    gridspec_kw=dict(height_ratios=[2, 1], width_ratios=[2, 1]),
+                    sharey=False,
+                ),
+            },
+        ),
     )
 
 
@@ -268,19 +273,19 @@ def test_align_x_axes():
 
     plt.rcParams.update({"font.size": 10})
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (14, 6)},
-        subfigs_params={"ncols": 3},
+        ngp.Figure(constrained_layout=True, figsize=(14, 6)),
+        ngp.SubfigsBuilder(ncols=3),
     )
 
     # Left plot: No alignment.
-    ax1 = plotter.ax_dict["ax1-1"]
+    ax1 = plotter.ax_dict["subfig_1_ax1-1"]
     axes1 = plotLines2(x1, x2, x3, y, ax1)
     ax1.set_title("No alignment")
 
     assert axes1[0].get_xticks().size != axes1[1].get_xticks().size
 
     # Mid plot: Aligned at (approximately) the lower bound of each y axis.
-    ax2 = plotter.ax_dict["ax1-2"]
+    ax2 = plotter.ax_dict["subfig_2_ax1-1"]
     axes2 = plotLines2(x1, x2, x3, y, ax2)
     ngp.align_x_axes(axes2)
     ax2.set_title("Default alignment")
@@ -293,7 +298,7 @@ def test_align_x_axes():
 
     # Right plot: Aligned at specified values: 0 for blue, 2.2*1e8 for red, and 44 for
     # green. Those are chosen arbitrarily for the example.
-    ax3 = plotter.ax_dict["ax1-3"]
+    ax3 = plotter.ax_dict["subfig_3_ax1-1"]
     axes3 = plotLines2(x1, x2, x3, y, ax3)
 
     # test the case with no arguments:
@@ -326,19 +331,19 @@ def test_align_y_axes():
 
     plt.rcParams.update({"font.size": 10})
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (14, 6)},
-        subfigs_params={"ncols": 3},
+        ngp.Figure(constrained_layout=True, figsize=(14, 6)),
+        ngp.SubfigsBuilder(ncols=3),
     )
 
     # Left plot: No alignment.
-    ax1 = plotter.ax_dict["ax1-1"]
+    ax1 = plotter.ax_dict["subfig_1_ax1-1"]
     axes1 = plotLines(x, y1, y2, y3, ax1)
     ax1.set_title("No alignment")
 
     assert axes1[0].get_yticks().size != axes1[1].get_yticks().size
 
     # Mid plot: Aligned at (approximately) the lower bound of each y axis.
-    ax2 = plotter.ax_dict["ax1-2"]
+    ax2 = plotter.ax_dict["subfig_2_ax1-1"]
     axes2 = plotLines(x, y1, y2, y3, ax2)
     ngp.align_y_axes(axes2)
     ax2.set_title("Default alignment")
@@ -351,7 +356,7 @@ def test_align_y_axes():
 
     # Right plot: Aligned at specified values: 0 for blue, 2.2*1e8 for red, and 44 for
     # green. Those are chosen arbitrarily for the example.
-    ax3 = plotter.ax_dict["ax1-3"]
+    ax3 = plotter.ax_dict["subfig_3_ax1-1"]
     axes3 = plotLines(x, y1, y2, y3, ax3)
     # test the case with no arguments:
     ngp.align_y_axes_on_values(
@@ -377,8 +382,8 @@ def test_align_y_axes():
 @pytest.mark.parametrize("min_abs_lims", (None, [100, 200]))
 def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (15, 5)},
-        subfigs_params={"ncols": 3},
+        ngp.Figure(constrained_layout=True, figsize=(15, 5)),
+        ngp.SubfigsBuilder(ncols=3),
     )
 
     # Make some data
@@ -389,7 +394,7 @@ def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
     y_data = np.arange(x_data1.size)
     xy = np.zeros(20)
 
-    ax1 = plotter.ax_dict["ax1-1"]
+    ax1 = plotter.ax_dict["subfig_1_ax1-1"]
     ax1_twin = ax1.twiny()
     ax1.plot(x_data1, y_data, label="data1")
     ax1_twin.plot(x_data2, y_data, c="r", label="data2")
@@ -398,7 +403,7 @@ def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
     assert ax1.get_xlim()[0] != -ax1.get_xlim()[1]
     assert ax1_twin.get_xlim()[0] != -ax1_twin.get_xlim()[1]
 
-    ax2 = plotter.ax_dict["ax1-2"]
+    ax2 = plotter.ax_dict["subfig_2_ax1-1"]
     ax2_twin = ax2.twiny()
     ax2.plot(x_data1, y_data, label="data1")
     ax2.plot(xy, y_data, linestyle="--")
@@ -408,7 +413,7 @@ def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
     )  # Works for more than 2 axes
     ax2.set_title("Specific alignment at y=0.0, no symmetry")
 
-    ax3 = plotter.ax_dict["ax1-3"]
+    ax3 = plotter.ax_dict["subfig_3_ax1-1"]
     ax3_twin = ax3.twinx()
     ax3.plot(x_data1, y_data, label="data1")
     ax3.plot(xy, y_data, linestyle="--")
@@ -440,8 +445,8 @@ def test_make_x_axes_symmetric_zero_centered(min_abs_lims) -> None:
 @pytest.mark.parametrize("min_abs_lims", (None, [100, 200]))
 def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (15, 5)},
-        subfigs_params={"ncols": 3},
+        ngp.Figure(constrained_layout=True, figsize=(15, 5)),
+        ngp.SubfigsBuilder(ncols=3),
     )
 
     # Make some data
@@ -451,7 +456,7 @@ def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
     data2 = np.random.rand(20)
     xy = np.zeros(20)
 
-    ax1 = plotter.ax_dict["ax1-1"]
+    ax1 = plotter.ax_dict["subfig_1_ax1-1"]
     ax1_twin = ax1.twinx()
     ax1.plot(data1, label="data1")
     ax1_twin.plot(data2, c="r", label="data2")
@@ -460,7 +465,7 @@ def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
     assert ax1.get_ylim()[0] != -ax1.get_ylim()[1]
     assert ax1_twin.get_ylim()[0] != -ax1_twin.get_ylim()[1]
 
-    ax2 = plotter.ax_dict["ax1-2"]
+    ax2 = plotter.ax_dict["subfig_2_ax1-1"]
     ax2_twin = ax2.twinx()
     ax2.plot(data1, label="data1")
     ax2.plot(xy, linestyle="--")
@@ -470,7 +475,7 @@ def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
     )  # Works for more than 2 axes
     ax2.set_title("Specific alignment at y=0.0, no symmetry")
 
-    ax3 = plotter.ax_dict["ax1-3"]
+    ax3 = plotter.ax_dict["subfig_3_ax1-1"]
     ax3_twin = ax3.twinx()
     ax3.plot(data1, label="data1")
     ax3.plot(xy, linestyle="--")
@@ -500,13 +505,13 @@ def test_make_y_axes_symmetric_zero_centered(min_abs_lims) -> None:
 
 
 def test_add_xaxis_twin_as_date() -> None:
-    plotter: ngp.NestedGridPlotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (15, 5)},
-        subfigs_params={"ncols": 3},
+    plotter = ngp.NestedGridPlotter(
+        ngp.Figure(constrained_layout=True, figsize=(15, 5)),
+        ngp.SubfigsBuilder(ncols=3),
     )
 
     # Plot the data
-    ax1: Axes = plotter.ax_dict["ax1-1"]
+    ax1: Axes = plotter.ax_dict["subfig_1_ax1-1"]
     ax1.plot(np.cumsum(0.004 + 0.04 * np.random.randn(100, 5)))
     ax1.set_title("A timeseries with daily data")
     ax1.set_xlabel("Number of days")
@@ -514,7 +519,10 @@ def test_add_xaxis_twin_as_date() -> None:
     # Add a date x axis
     with pytest.raises(
         NotImplementedError,
-        match=r"\"add_xaxis_twin_as_date\" was removed in version 1.2, use \"add_twin_axis_as_datetime\" instead!",
+        match=(
+            r"\"add_xaxis_twin_as_date\" was removed in version 1.2, use"
+            r" \"add_twin_axis_as_datetime\" instead!"
+        ),
     ):
         ngp.add_xaxis_twin_as_date(
             ax1,
@@ -528,8 +536,8 @@ def test_add_xaxis_twin_as_date() -> None:
 @pytest.mark.parametrize("is_y_axis", ((True,), (False,)))
 def ticklabels_to_datetime(is_y_axis: bool) -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (15, 5)},
-        subplots_mosaic_params={"fig0": dict(mosaic=[["ax1-1", "ax1-2", "ax1-3"]])},
+        ngp.Figure(constrained_layout=True, figsize=(15, 5)),
+        ngp.SubplotsMosaicBuilder(mosaic=[["ax1-1", "ax1-2", "ax1-3"]]),
     )
 
     # Plot the data
@@ -551,8 +559,8 @@ def ticklabels_to_datetime(is_y_axis: bool) -> None:
 @pytest.mark.parametrize("position", (("top"), ("bottom"), ("left"), ("right")))
 def test_add_twin_axis_as_datetime(position) -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (15, 5)},
-        subplots_mosaic_params={"fig0": dict(mosaic=[["ax1-1", "ax1-2", "ax1-3"]])},
+        ngp.Figure(constrained_layout=True, figsize=(15, 5)),
+        ngp.SubplotsMosaicBuilder(mosaic=[["ax1-1", "ax1-2", "ax1-3"]]),
     )
 
     # Plot the data
@@ -618,15 +626,16 @@ def test_add_twin_axis_as_datetime(position) -> None:
 
 def test_add_letter_to_frames_less26axes() -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (10, 10)},
-        subfigs_params={"ncols": 3, "nrows": 3},
+        ngp.Figure(constrained_layout=True, figsize=(10, 10)),
+        ngp.SubfigsBuilder(ncols=3, nrows=3),
     )
+
     ngp.add_letter_to_frames(plotter.axes)
 
 
 def test_add_letter_to_frames_more26axes() -> None:
     plotter = ngp.NestedGridPlotter(
-        fig_params={"constrained_layout": True, "figsize": (10, 10)},
-        subfigs_params={"ncols": 7, "nrows": 7},
+        ngp.Figure(constrained_layout=True, figsize=(10, 10)),
+        ngp.SubfigsBuilder(ncols=7, nrows=7),
     )
     ngp.add_letter_to_frames(plotter.axes)

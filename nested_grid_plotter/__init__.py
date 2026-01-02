@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """
 Purpose
 =======
@@ -13,6 +15,9 @@ Classes
 .. autosummary::
    :toctree: _autosummary
 
+    SubfigsBuilder
+    SubplotsMosaicBuilder
+    Plotter
     NestedGridPlotter
     AnimatedPlotter
 
@@ -51,9 +56,16 @@ Plot functions
 
 """
 
+from matplotlib.figure import Figure
+
 from nested_grid_plotter.__about__ import __author__, __name__, __version__
 from nested_grid_plotter.animated_plotter import AnimatedPlotter
-from nested_grid_plotter.base_plotter import NestedGridPlotter
+from nested_grid_plotter.base_plotter import (
+    NestedGridPlotter,
+    Plotter,
+    SubfigsBuilder,
+    SubplotsMosaicBuilder,
+)
 from nested_grid_plotter.imshow import multi_imshow
 from nested_grid_plotter.utils import (
     add_grid_and_tick_prams_to_axis,
@@ -80,6 +92,10 @@ __all__ = [
     "__version__",
     "__name__",
     "__author__",
+    "Figure",
+    "SubplotsMosaicBuilder",
+    "SubfigsBuilder",
+    "Plotter",
     "NestedGridPlotter",
     "AnimatedPlotter",
     "get_line_style",

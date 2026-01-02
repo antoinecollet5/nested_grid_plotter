@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """Provide some tools for 2D plots."""
 
 import copy
@@ -18,7 +20,7 @@ from matplotlib.image import AxesImage
 
 
 def _apply_default_imshow_kwargs(
-    imshow_kwargs: Optional[Dict[str, Any]]
+    imshow_kwargs: Optional[Dict[str, Any]],
 ) -> Dict[str, Any]:
     """Apply default values to the given imshow kwargs dictionary."""
     _imshow_kwargs: dict[str, Any] = {
@@ -77,13 +79,13 @@ def add_2d_grid(
         x=np.arange(0, nx) + 0.5,
         ymin=np.full(nx, 0) - 0.5,
         ymax=np.full(nx, ny) - 0.5,
-        **_kwargs,
+        **_kwargs,  # ty: ignore[invalid-argument-type]
     )
     ax.hlines(
         y=np.arange(0, ny) + 0.5,
         xmin=np.full(ny, 0) - 0.5,
         xmax=np.full(ny, nx) - 0.5,
-        **_kwargs,
+        **_kwargs,  # ty: ignore[invalid-argument-type]
     )
 
 
@@ -172,7 +174,7 @@ def _norm_data_and_cbar(
     is_symmetric_cbar : bool
         Does the scale need to be symmetric and centered to zero. The default is False.
     """
-    norm: colors.Normalize = _imshow_kwargs.get("norm", colors.Normalize())
+    norm: colors.Normalize = _imshow_kwargs.get("norm", colors.Normalize(clip=True))
     if isinstance(norm, colors.LogNorm) and is_symmetric_cbar:
         warnings.warn(
             "You used a LogNorm norm instance which is incompatible with a"
@@ -192,6 +194,44 @@ def _norm_data_and_cbar(
     norm.vmax = vmax
     for im in images:
         im.set_norm(norm)
+
+
+def _get_argsort_im_data(
+    data: Dict[str, npt.NDArray[np.float64]],
+) -> npt.NDArray[np.int64]:
+    """
+    Get the argsort for images data by increasing dimensions.
+
+    .. versionadded:: 2.0
+
+    If both x and y dimensions vary between data values, then data is return as is and
+    no sorting is performed.
+    """
+    shapes = {}
+    for key, val in data.items():
+        if not len(val.shape) == 2:
+            raise ValueError(
+                f'The given data for "{key}" has dimension {len(val.shape)} '
+                "whereas it should be two dimensional!"
+            )
+        shapes[key] = val.shape
+
+    _shapesv = np.array(list(shapes.values()))
+    x_shapes = np.unique(_shapesv[:, 0])
+    y_shapes = np.unique(_shapesv[:, 1])
+
+    if x_shapes.size == 1 or y_shapes.size == 1:
+        if y_shapes.size != 1:
+            return np.argsort(_shapesv[:, 1])
+        else:
+            return np.argsort(_shapesv[:, 0])
+
+    if x_shapes.size != 1 and y_shapes.size != 1:
+        warnings.warn(
+            f"Data have different shapes: {shapes}. This might cause display"
+            " issues if some axes share xaxis or yaxis!"
+        )
+    return np.arange(len(data))
 
 
 def multi_imshow(
@@ -249,14 +289,15 @@ def multi_imshow(
     _cbar_kwargs: Dict[str, Any] = _apply_default_colorbar_kwargs(cbar_kwargs, axes)
 
     images_dict: Dict[str, AxesImage] = {}
-    for j, (label, values) in enumerate(data.items()):
-        ax: Axes = axes[j]
-        if not len(values.shape) == 2:
-            raise ValueError(
-                f'The given data for "{label}" has dimension {len(values.shape)} '
-                "whereas it should be two dimensional!"
-            )
 
+    # order to make sure that the largest image is displayed last (just in case
+    # sharex or sharey is active)
+    _order = list(_get_argsort_im_data(data))
+    for (
+        j,
+        (label, values),
+    ) in sorted(zip(_get_argsort_im_data(data), data.items())):
+        ax: Axes = axes[_order[j]]
         # Need to transpose because the dimensions (M, N) define the rows and
         # columns
         # Also, need to copy the _imshow_kwargs to avoid its update. Otherwise the
@@ -270,13 +311,13 @@ def multi_imshow(
         if ylabel is not None:
             ax.set_ylabel(ylabel, fontweight="bold")
 
-        # norm both data and colobar
-        _norm_data_and_cbar(
-            list(images_dict.values()),
-            list(data.values()),
-            _imshow_kwargs,
-            is_symmetric_cbar,
-        )
+    # norm both data and colobar
+    _norm_data_and_cbar(
+        list(images_dict.values()),
+        list(data.values()),
+        _imshow_kwargs,
+        is_symmetric_cbar,
+    )
 
     cbar: Colorbar = fig.colorbar(list(images_dict.values())[0], **_cbar_kwargs)
     if cbar_title is not None:

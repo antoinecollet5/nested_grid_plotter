@@ -13,48 +13,51 @@ env:
 
 jobs:
   static_analysis:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.13
 
-      - name: Install dependencies
-        run: pip install -r requirements_dev.txt
-
-      - name: Run pre-commit
+      - name: Install dependencies with uv
         run: |
-          pip install pre-commit
-          pre-commit run --all-files
+          pip install uv
+          uv venv
+          uv pip install -e ".[all]"
+
+      - name: Run pre-commit hooks
+        run: |
+          uv run pre-commit run --all-files  # Run pre-commit inside the uv virtual environment
+
         continue-on-error: false
 
       - name: Upload pre-commit report
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: pre-commit-report
           path: pre-commit-report
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.13
 
-      - name: Install dependencies
-        run: pip install -r requirements_dev.txt
-
-      - name: Install project
-        run: pip install -e .
+      - name: Install dependencies with uv
+        run: |
+          pip install uv
+          uv venv
+          uv pip install -e ".[all]"
 
       - name: Set up xvfb
         run: |
@@ -64,43 +67,51 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          xvfb-run py.test -s --cov=nested_grid_plotter --cov-report xml --cov-report html --cov-report term --cov-config=.coveragerc --color=yes
-        continue-on-error: false
+          uv run xvfb-run pytest \
+            -s \
+            --cov=nested_grid_plotter \
+            --cov-report xml \
+            --cov-report html \
+            --cov-report term \
+            --cov-config=.coveragerc \
+            --color=yes
 
-      - name: Submit coverage
-        run: |
-          pip install codecov
-          codecov --token=${{ secrets.CODECOV_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
 
   tox:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
-      max-parallel: 4
+      max-parallel: 7
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install tox
-        run: python3 -m pip install tox
-
-      - name: Set up xvfb
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb
-          sleep 3
+          sudo apt-get install -y pandoc
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install tox tox-gh-actions
 
       - name: Run tox
-        run: xvfb-run tox
+        run: tox
 
       - name: Upload distribution artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: ubuntu-python-package-${{matrix.python-version}}
           path: dist/*.whl

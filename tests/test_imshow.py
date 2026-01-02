@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """
 Tests for the imshow sub module.
 
@@ -8,7 +10,7 @@ follow the same order.
 """
 
 import re
-from contextlib import contextmanager
+from contextlib import nullcontext as does_not_raise
 from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
@@ -17,20 +19,15 @@ import pytest
 from matplotlib import colors
 from matplotlib.axes import Axes  # Just for liting
 from matplotlib.figure import Figure
-
 from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,
+    _get_argsort_im_data,
     _norm_data_and_cbar,
     add_2d_grid,
     multi_imshow,
 )
-
-
-@contextmanager
-def does_not_raise():
-    yield
 
 
 def get_2_axes() -> Tuple[Figure, Tuple[Axes, Axes]]:
@@ -107,21 +104,23 @@ def test_normalize_data_and_cbar(
     data2 = np.random.uniform(low=0.5, high=4.0, size=(10, 10))
 
     im1 = ax1.imshow(data1)
-    assert 1.0 > im1.norm.vmin > -1.0
-    assert 1.0 > im1.norm.vmax > -1.0
+    assert 1.0 > im1.norm.vmin > -1.0  # ty: ignore[unsupported-operator]
+    assert 1.0 > im1.norm.vmax > -1.0  # ty: ignore[unsupported-operator]
     im2 = ax2.imshow(data2)
-    assert 4.0 > im2.norm.vmin > 0.5
-    assert 4.0 > im2.norm.vmax > 0.5
+    assert 4.0 > im2.norm.vmin > 0.5  # ty: ignore[unsupported-operator]
+    assert 4.0 > im2.norm.vmax > 0.5  # ty: ignore[unsupported-operator]
     _norm_data_and_cbar(
         [im1, im2], [data1, data2], imshow_kwargs, is_symmetric_cbar=is_symmetric
     )
-    assert im1.norm.vmax == im2.norm.vmax
-    assert im1.norm.vmin == im2.norm.vmin
-    assert im1.norm.vmax > 1.0
-    assert 0.5 > im2.norm.vmin
+    assert im1.norm.vmax == im2.norm.vmax  # ty: ignore[unsupported-operator]
+    assert im1.norm.vmin == im2.norm.vmin  # ty: ignore[unsupported-operator]
+    assert im1.norm.vmax > 1.0  # ty: ignore[unsupported-operator]
+    assert 0.5 > im2.norm.vmin  # ty: ignore[unsupported-operator]
 
     if is_symmetric:
-        assert im1.norm.vmin == -im1.norm.vmax == -np.max(data2)
+        assert (
+            im1.norm.vmin == -im1.norm.vmax == -np.max(data2)  # ty: ignore[unsupported-operator]
+        )
 
 
 @pytest.mark.parametrize(
@@ -209,3 +208,67 @@ def test_multi_imshow_exception() -> None:
         " 3 whereas it should be two dimensional!",
     ):
         multi_imshow(axes, fig, data)
+
+
+@pytest.mark.parametrize(
+    "data, expected_order, expected_exception",
+    [
+        (
+            {
+                "data1": np.ones((2, 4)).T,
+            },
+            [0],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((65, 1)).T,
+                "data2": np.ones((65, 1)).T,
+                "data3": np.ones((65, 1)).T,
+                "data4": np.ones((65, 1)).T,
+            },
+            [0, 1, 2, 3],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((2, 2)).T,
+                "data2": np.ones((2, 3)).T,
+                "data3": np.ones((2, 2)).T,
+            },
+            [0, 2, 1],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((4, 2)).T,
+                "data2": np.ones((2, 2)).T,
+                "data3": np.ones((5, 2)).T,
+            },
+            [1, 0, 2],
+            does_not_raise(),
+        ),
+        (
+            {
+                "data1": np.ones((4, 2)).T,
+                "data2": np.ones((2, 5)).T,
+                "data3": np.ones((5, 2)).T,
+            },
+            [0, 1, 2],
+            pytest.warns(
+                UserWarning,
+                match=(
+                    re.escape(
+                        r"Data have different shapes: {'data1': (2, 4), "
+                        r"'data2': (5, 2), 'data3':"
+                        r" (2, 5)}. This might cause display issues "
+                        r"if some axes share xaxis or yaxis!"
+                    )
+                ),
+            ),
+        ),
+    ],
+)
+def test_get_argsort_im_data(data, expected_order, expected_exception) -> None:
+    with expected_exception:
+        np.testing.assert_equal(_get_argsort_im_data(data), expected_order)

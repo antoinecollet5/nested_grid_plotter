@@ -1,5 +1,7 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """
-Test the AnimatedPlotter class.
+Test the ngp.AnimatedPlotter class.
 
 Note that the tests are very similar to the examples found in the tutorial and
 follow the same order.
@@ -9,26 +11,21 @@ follow the same order.
 
 import itertools
 import re
-from contextlib import contextmanager
+from contextlib import nullcontext as does_not_raise
 from pathlib import Path
-from typing import Generator, List, Optional
+from typing import List, Optional
 
+import nested_grid_plotter as ngp
 import numpy as np
 import pytest
 from matplotlib import colors
 from matplotlib.animation import HTMLWriter
 from matplotlib.figure import Figure
 from matplotlib.text import Text
-
-from nested_grid_plotter.animated_plotter import AnimatedPlotter, _get_nb_frames
+from nested_grid_plotter.animated_plotter import _get_nb_frames
 
 # turns all warnings into errors for this module
 # pytestmark = pytest.mark.filterwarnings("error")
-
-
-@contextmanager
-def does_not_raise() -> Generator[None, None, None]:
-    yield
 
 
 @pytest.fixture
@@ -60,28 +57,28 @@ def tmp_folder(tmp_path_factory) -> Path:
 )
 def test_get_nb_frames(
     nb_frames: Optional[int], nb_steps: int, expected_value: int, expected_exception
-) -> int:
+) -> None:
     with expected_exception:
         assert _get_nb_frames(nb_frames, nb_steps) == expected_value
 
 
-def make_2_frames_plotter() -> AnimatedPlotter:
-    return AnimatedPlotter(
-        fig_params={"figsize": (10, 5)},
-        subplots_mosaic_params={
-            "fig0": dict(mosaic=[["ax11", "ax12"]], sharey=True, sharex=True)
-        },
+def make_2_frames_plotter() -> ngp.AnimatedPlotter:
+    return ngp.AnimatedPlotter(
+        ngp.Figure(figsize=(10, 5), constrained_layout=True),
+        builder=ngp.SubplotsMosaicBuilder(
+            mosaic=[["ax11", "ax12"]], sharey=True, sharex=True
+        ),
     )
 
 
-def test_init() -> AnimatedPlotter:
-    return AnimatedPlotter()
+def test_init() -> None:
+    assert ngp.AnimatedPlotter() is not None
 
 
 def test_no_animation() -> None:
     """Test the case when no animation has been defined."""
     with pytest.raises(AttributeError, match=r"No animation as been defined !"):
-        AnimatedPlotter().animation
+        ngp.AnimatedPlotter().animation
 
 
 def test_animated_multi_plot(tmp_folder) -> None:
@@ -171,7 +168,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
 
     # Add title animation
     seq = [f"My fig title @ frame #{i}" for i in range(nb_frames)]
-    plotter.subfigs["fig0"].suptitle(seq[0])
+    plotter.fig.suptitle(seq[0])
 
     # Change the color, just for fun
     colors = itertools.cycle(("r", "g", "b", "c", "k", "orange"))
@@ -180,9 +177,7 @@ def test_animated_multi_plot(tmp_folder) -> None:
     def _animate(frame: int) -> List[Text]:
         """Update the text value."""
         # txt.set_text(seq[frame])  # -> to change the text of the title only
-        txt: Text = plotter.subfigs["fig0"].suptitle(
-            seq[0], fontsize=20, color=next(colors)
-        )
+        txt: Text = plotter.fig.suptitle(seq[0], fontsize=20, color=next(colors))
         return [
             txt,
         ]
@@ -198,11 +193,16 @@ def test_animated_multi_plot(tmp_folder) -> None:
     fname_html: Path = tmp_folder.joinpath("test1D.html")
     writer: HTMLWriter = HTMLWriter(fps=20, embed_frames=True)
     writer.frame_format = "svg"  # Ensure svg format
-    plotter.animation.save(fname_html, writer=writer)
+    plotter.save_animation(fname_html, writer=writer)
+
+    # try again with no engine
+    plotter.fig._layout_engine = None  # ty: ignore
+    # add savefig_kwargs just for the coverage
+    plotter.save_animation(fname_html, writer=writer, savefig_kwargs={})
 
 
 def test_multi_plot_x_vector_exception() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -218,7 +218,7 @@ def test_multi_plot_x_vector_exception() -> None:
 
 
 def test_multi_plot_nb_steps_exception() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -236,7 +236,7 @@ def test_multi_plot_nb_steps_exception() -> None:
 
 
 def test_1D_exceptions_3() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -254,7 +254,7 @@ def test_1D_exceptions_3() -> None:
 
 
 def test_1D_exceptions_4() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -272,7 +272,7 @@ def test_1D_exceptions_4() -> None:
 
 
 def test_1D_exceptions_5() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -290,7 +290,7 @@ def test_1D_exceptions_5() -> None:
 
 
 def test_1D_exceptions_6() -> None:
-    plotter: AnimatedPlotter = AnimatedPlotter()
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
 
     with pytest.raises(
         ValueError,
@@ -307,11 +307,56 @@ def test_1D_exceptions_6() -> None:
         )
 
 
+@pytest.mark.filterwarnings("error")
+def test_1D_warning_as_error() -> None:
+    plotter: ngp.AnimatedPlotter = ngp.AnimatedPlotter()
+
+    with pytest.raises(
+        UserWarning,
+        match=re.escape(
+            "The c argument should have a length one less than the length of "
+            "x and y. If it has the same length, use the colored_line function instead."
+        ),
+    ):
+        plotter.animated_multi_plot(
+            ax_name="ax1-1",
+            data={
+                "curve1": {
+                    "x": np.ones(5),
+                    "y": np.ones((5, 10)),
+                    "c": np.ones((5, 10)),
+                },
+                "curve2": {"x": np.ones(5), "y": np.ones((5, 10))},
+            },
+        )
+
+    # no warning
+    plotter.animated_multi_plot(
+        ax_name="ax1-1",
+        data={
+            "curve1": {
+                "x": np.ones(5),
+                "y": np.ones((5, 10)),
+                "c": np.ones((4, 10)),
+            },
+            "curve2": {"x": np.ones(5), "y": np.ones((5, 10))},
+        },
+    )
+
+
 @pytest.mark.parametrize(
-    "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel",
+    "is_fig,is_symmetric_cbar,cbar_title,imshow_kwargs,xlabel,ylabel,expected_warnings",
     [
-        (True, False, None, None, None, None),
-        (True, True, "my title", {"vmin": 2.0, "vmax": 5.0}, "xlab", "ylab"),
+        (True, False, None, None, None, None, does_not_raise()),
+        (
+            True,
+            True,
+            "my title",
+            {"vmin": 2.0, "vmax": 5.0},
+            "xlab",
+            "ylab",
+            does_not_raise(),
+        ),
         (
             False,
             True,
@@ -319,11 +364,24 @@ def test_1D_exceptions_6() -> None:
             {"norm": colors.LogNorm(vmin=1e-6, vmax=100.0)},
             "xlab",
             "ylab",
+            pytest.warns(
+                UserWarning,
+                match="You used a LogNorm norm instance which is incompatible with a "
+                "symmetric colorbar. Symmetry is ignored. Use SymLogNorm for "
+                "symmetrical logscale color bar.",
+            ),
         ),
     ],
 )
 def test_animated_multi_imshow(
-    tmp_folder, is_fig, is_symmetric_cbar, cbar_title, imshow_kwargs, xlabel, ylabel
+    tmp_folder,
+    is_fig,
+    is_symmetric_cbar,
+    cbar_title,
+    imshow_kwargs,
+    xlabel,
+    ylabel,
+    expected_warnings,
 ) -> None:
     plotter = make_2_frames_plotter()
 
@@ -349,17 +407,18 @@ def test_animated_multi_imshow(
         fig = None
 
     # Plot it
-    plotter.animated_multi_imshow(
-        ["ax11", "ax12"],
-        data,
-        fig=fig,
-        nb_frames=nb_frames,
-        imshow_kwargs=imshow_kwargs,
-        cbar_title=cbar_title,
-        xlabel=xlabel,
-        ylabel=ylabel,
-        is_symmetric_cbar=is_symmetric_cbar,
-    )
+    with expected_warnings:
+        plotter.animated_multi_imshow(
+            ["ax11", "ax12"],
+            data,
+            fig=fig,
+            nb_frames=nb_frames,
+            imshow_kwargs=imshow_kwargs,
+            cbar_title=cbar_title,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            is_symmetric_cbar=is_symmetric_cbar,
+        )
     # plotter.close() -> this crashes on github pipelines
     plotter.animate(nb_frames=nb_frames)
 
@@ -367,7 +426,7 @@ def test_animated_multi_imshow(
     fname_html: Path = tmp_folder.joinpath("test2D.html")
     writer: HTMLWriter = HTMLWriter(fps=20, embed_frames=True)
     writer.frame_format = "svg"  # Ensure svg format
-    plotter.animation.save(fname_html, writer=writer)
+    plotter.save_animation(fname_html, writer=writer)
 
 
 def test_animated_multi_imshow_nb_steps_exception() -> None:

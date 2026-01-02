@@ -26,12 +26,12 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-test clean-lint ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr docs/build/
-	rm -fr docs/source/_autosummary/
+	rm -fr docs/sources/_autosummary/
 	rm -fr dist/
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
@@ -44,23 +44,35 @@ clean-pyc: ## remove Python file artifacts
 	find . -name '__pycache__' -exec rm -fr {} +
 
 clean-test: ## remove test and coverage artifacts
-	rm -fr .tox/
+	rm -rf ./.tox/
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
-	flake8 nested_grid_plotter tests
+clean-lint: ## remove mypy and ruff caches
+	rm -rf .mypy_cache
+	rm -rf .ruff_cache
 
-test: ## run tests quickly with the default Python
+lint: ## check style with flake8
+	ruff check nested_grid_plotter tests
+
+test-unitary: ## run tests quickly with the default Python
+	pytest tests
+
+test-notebook:
 	pytest --nbmake **/*ipynb
-	pytest test
 
 test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
 	coverage run --source nested_grid_plotter -m pytest --nbmake
+	coverage report -m
+	coverage html
+	$(BROWSER) htmlcov/index.html
+
+fast-coverage: ## check code coverage quickly with the default Python
+	coverage run --source nested_grid_plotter -m pytest tests
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html

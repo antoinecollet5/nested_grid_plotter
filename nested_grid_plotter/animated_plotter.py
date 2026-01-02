@@ -1,12 +1,15 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """Offer a field plotter."""
 
 import copy
 import warnings
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Union
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 import numpy as np
 import numpy.typing as npt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import Animation, FuncAnimation, MovieWriter
 from matplotlib.axes import Axes
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure, SubFigure
@@ -14,7 +17,7 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
-from nested_grid_plotter.base_plotter import NestedGridPlotter
+from nested_grid_plotter.base_plotter import NestedBuilder, NestedGridPlotter
 from nested_grid_plotter.imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
@@ -72,9 +75,8 @@ class AnimatedPlotter(NestedGridPlotter):
 
     def __init__(
         self,
-        fig_params: Optional[Dict[str, Any]] = None,
-        subfigs_params: Optional[Dict[str, Any]] = None,
-        subplots_mosaic_params: Optional[Dict[str, Any]] = None,
+        fig: Optional[Figure] = None,
+        builder: Optional[NestedBuilder] = None,
     ) -> None:
         """
         Initiate the instance.
@@ -93,11 +95,7 @@ class AnimatedPlotter(NestedGridPlotter):
         -------
         None
         """
-        _fig_params = dict(constrained_layout=True)
-        if fig_params is not None:
-            _fig_params.update(fig_params)
-
-        super().__init__(_fig_params, subfigs_params, subplots_mosaic_params)
+        super().__init__(fig, builder)
         # self.fig.patch.set_facecolor("w")
         self.init_animations_list: List[Callable] = []
         self.animations_list: List[Callable] = []
@@ -153,6 +151,118 @@ class AnimatedPlotter(NestedGridPlotter):
             repeat=False,
         )
         return self.animation
+
+    def save_animation(
+        self,
+        filename: Union[str, Path],
+        writer: Optional[MovieWriter] = None,
+        fps: Optional[int] = None,
+        dpi: Optional[float] = None,
+        codec: Optional[str] = None,
+        bitrate: Optional[int] = None,
+        extra_args: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, str]] = None,
+        extra_anim: Optional[List[Animation]] = None,
+        savefig_kwargs: Optional[Dict[str, Any]] = None,
+        *,
+        progress_callback: Optional[Callable] = None,
+    ) -> None:
+        """
+        Save the animation as a movie file by drawing every frame.
+
+        Parameters
+        ----------
+        filename : str
+            The output filename, e.g., :file:`mymovie.mp4`.
+
+        writer : `MovieWriter` or str, default: :rc:`animation.writer`
+            A `MovieWriter` instance to use or a key that identifies a
+            class to use, such as 'ffmpeg'.
+
+        fps : int, optional
+            Movie frame rate (per second).  If not set, the frame rate from the
+            animation's frame interval.
+
+        dpi : float, default: :rc:`savefig.dpi`
+            Controls the dots per inch for the movie frames.  Together with
+            the figure's size in inches, this controls the size of the movie.
+
+        codec : str, default: :rc:`animation.codec`.
+            The video codec to use.  Not all codecs are supported by a given
+            `MovieWriter`.
+
+        bitrate : int, default: :rc:`animation.bitrate`
+            The bitrate of the movie, in kilobits per second.  Higher values
+            means higher quality movies, but increase the file size.  A value
+            of -1 lets the underlying movie encoder select the bitrate.
+
+        extra_args : list of str or None, optional
+            Extra command-line arguments passed to the underlying movie encoder. These
+            arguments are passed last to the encoder, just before the output filename.
+            The default, None, means to use :rc:`animation.[name-of-encoder]_args` for
+            the builtin writers.
+
+        metadata : dict[str, str], default: {}
+            Dictionary of keys and values for metadata to include in
+            the output file. Some keys that may be of use include:
+            title, artist, genre, subject, copyright, srcform, comment.
+
+        extra_anim : list, default: []
+            Additional `Animation` objects that should be included
+            in the saved movie file. These need to be from the same
+            `.Figure` instance. Also, animation frames will
+            just be simply combined, so there should be a 1:1 correspondence
+            between the frames from the different animations.
+
+        savefig_kwargs : dict, default: {}
+            Keyword arguments passed to each `~.Figure.savefig` call used to
+            save the individual frames.
+
+        progress_callback : function, optional
+            A callback function that will be called for every frame to notify
+            the saving progress. It must have the signature ::
+
+                def func(current_frame: int, total_frames: int) -> Any
+
+            where *current_frame* is the current frame number and *total_frames* is the
+            total number of frames to be saved. *total_frames* is set to None, if the
+            total number of frames cannot be determined. Return values may exist but are
+            ignored.
+
+            Example code to write the progress to stdout::
+
+                progress_callback = lambda i, n: print(f'Saving frame {i}/{n}')
+
+        Notes
+        -----
+        *fps*, *codec*, *bitrate*, *extra_args* and *metadata* are used to
+        construct a `.MovieWriter` instance and can only be passed if
+        *writer* is a string.  If they are passed as non-*None* and *writer*
+        is a `.MovieWriter`, a `RuntimeError` will be raised.
+        """
+
+        engine = self.fig.get_layout_engine()
+        if engine is not None:
+            engine.execute(self.fig)
+
+        if savefig_kwargs is None:
+            savefig_kwargs = {}
+        savefig_kwargs.update(
+            {"bbox_extra_artists": tuple(self._get_bbox_extra_artists(savefig_kwargs))}
+        )
+        self.animation.save(
+            filename,
+            writer=writer,
+            fps=fps,
+            dpi=dpi,
+            codec=codec,
+            bitrate=bitrate,
+            extra_args=extra_args,
+            metadata=metadata,
+            extra_anim=extra_anim,
+            savefig_kwargs=savefig_kwargs,
+            progress_callback=progress_callback,
+        )
 
     def plot_animated_text(
         self, ax: Axes, x: float, y: float, s: Sequence[str], **kwargs: Any
@@ -235,6 +345,7 @@ class AnimatedPlotter(NestedGridPlotter):
         # store all data in a list
         x_list: List[NDArrayFloat] = []
         y_list: List[NDArrayFloat] = []
+        c_dict: Dict[str, Any] = {}
         # The results are stored in plot_dict and allow updating the values.
         plot_dict = {}
 
@@ -248,6 +359,20 @@ class AnimatedPlotter(NestedGridPlotter):
                 raise ValueError(
                     f'Error with data arguments: for key "{label}" y must be given!'
                 )
+
+            # color
+            c = val.get("c")
+            # Check color array size (LineCollection still works, but values are unused)
+            if c is not None and x is not None:
+                if len(c) != len(x) - 1:
+                    warnings.warn(
+                        "The c argument should have a length one less than the "
+                        "length of x and y. "
+                        "If it has the same length, use the colored_line "
+                        "function instead."
+                    )
+                c_dict[label] = c
+                print(c_dict[label])
 
             # Generate a series to adjust the y axis bounds without setting
             # y_extend = np.nanmax(y_list) - np.nanmin(y_list)
@@ -321,6 +446,12 @@ class AnimatedPlotter(NestedGridPlotter):
                 plot_dict[label].set_ydata(
                     y_list[index][:, data_index],
                 )
+
+                try:
+                    plot_dict[label].set_color(c_dict[label][data_index])
+                except (IndexError, KeyError):
+                    pass
+
             return list(plot_dict.values())
 
         self.init_animations_list.append(_init)
@@ -328,7 +459,7 @@ class AnimatedPlotter(NestedGridPlotter):
 
     def animated_multi_imshow(
         self,
-        ax_names: Iterable[str],
+        ax_names: Sequence[str],
         data: Dict[str, NDArrayFloat],
         fig: Optional[Union[Figure, SubFigure]] = None,
         nb_frames: Optional[int] = None,

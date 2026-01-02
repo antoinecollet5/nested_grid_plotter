@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2026 Antoine COLLET
 """
 Utilities for matplotlib.
 """
@@ -5,24 +7,37 @@ Utilities for matplotlib.
 import base64
 import re
 import string
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
+import numpy.typing as npt
 from dateutil.relativedelta import relativedelta
 from matplotlib.axes import Axes
 from matplotlib.axes._base import _AxesBase
 from typing_extensions import Literal
 
-NDArrayFloat = np.typing.NDArray[np.float64]
+NDArrayFloat = npt.NDArray[np.float64]
 # pylint: disable=C0103 # does not confrom to snake case naming style
 # pylint: disable=R0913 # too many arguments
 # pylint: disable=R0914 # too many local variables
 
+_Object = TypeVar("_Object", bound=object)
 
-def get_line_style(line_style_label: str) -> Tuple[float, Tuple[float]]:
+
+def object_or_object_sequence_to_list(
+    _input: Union[_Object, Sequence[_Object]],
+) -> List[_Object]:
+    """Convert a singleton or an iterable of this object to a list of object."""
+    if isinstance(_input, Iterable):
+        return [item for item in _input]  # ty: ignore[invalid-return-type]
+    return [_input]
+
+
+def get_line_style(line_style_label: str) -> Tuple[float, Sequence[int]]:
     """
     Get a parametrized linestyle from a line style label.
 
@@ -42,20 +57,20 @@ def get_line_style(line_style_label: str) -> Tuple[float, Tuple[float]]:
 
     """
     return {
-        "solid": (0, ()),
-        "loosely dotted": (0, (1, 10)),
-        "dotted": (0, (1, 5)),
-        "densely dotted": (0, (1, 1)),
-        "loosely dashed": (0, (5, 10)),
-        "dashed": (0, (5, 5)),
-        "densely dashed": (0, (5, 1)),
-        "loosely dashdotted": (0, (3, 10, 1, 10)),
-        "dashdotted": (0, (3, 5, 1, 5)),
-        "densely dashdotted": (0, (3, 1, 1, 1)),
-        "loosely dashdotdotted": (0, (3, 10, 1, 10, 1, 10)),
-        "dashdotdotted": (0, (3, 5, 1, 5, 1, 5)),
-        "densely dashdotdotted": (0, (3, 1, 1, 1, 1, 1)),
-    }.get(line_style_label, (0, ()))
+        "solid": (0.0, ()),
+        "loosely dotted": (0.0, (1, 10)),
+        "dotted": (0.0, (1, 5)),
+        "densely dotted": (0.0, (1, 1)),
+        "loosely dashed": (0.0, (5, 10)),
+        "dashed": (0.0, (5, 5)),
+        "densely dashed": (0.0, (5, 1)),
+        "loosely dashdotted": (0.0, (3, 10, 1, 10)),
+        "dashdotted": (0.0, (3, 5, 1, 5)),
+        "densely dashdotted": (0.0, (3, 1, 1, 1)),
+        "loosely dashdotdotted": (0.0, (3, 10, 1, 10, 1, 10)),
+        "dashdotdotted": (0.0, (3, 5, 1, 5, 1, 5)),
+        "densely dashdotdotted": (0.0, (3, 1, 1, 1, 1, 1)),
+    }.get(line_style_label, (0.0, tuple()))
 
 
 def make_patch_spines_invisible(ax: Axes) -> None:
@@ -94,6 +109,7 @@ def make_patch_spines_invisible(ax: Axes) -> None:
 def extract_frames_from_embedded_html_animation(
     fpath: Union[str, Path],
     target_path: Optional[Union[str, Path]] = None,
+    start_indices_at_one: bool = True,
 ) -> None:
     """
     Extract the embedded frames from an html animation created with matplotlib.
@@ -106,6 +122,9 @@ def extract_frames_from_embedded_html_animation(
         Target path where to store the extracted frames. If None, a folder with
         the name of the html file is created at the location of the html file. If
         default is None.
+    start_indices_at_one: bool
+        Whether to start indices at one or ay zero. The default is True, i.e., start at
+        one.
 
     Notes
     -----
@@ -124,6 +143,8 @@ def extract_frames_from_embedded_html_animation(
         r'(?P<frame_format>jpeg|tiff|png|svg\+xml);base64,(?P<content>[^ "]+)"'
     )
 
+    start_index: int = 1 if start_indices_at_one else 0
+
     # Iterate the patterns
     for m in pattern.finditer(input_text):
         res = m.groupdict()
@@ -131,14 +152,17 @@ def extract_frames_from_embedded_html_animation(
         if frame_format == r"svg+xml":
             frame_format = "svg"
         path = _target_path.joinpath(
-            f"frame{int(res.get('frame_index')):0>7d}.{frame_format}"
+            f"frame{int(res.get('frame_index', np.inf)) + start_index:0>7d}"
+            f".{frame_format}"
         )
         if frame_format == "svg":
             path.write_text(
-                base64.b64decode(res.get("content").encode("utf-8")).decode("utf-8")
+                base64.b64decode(
+                    res.get("content", "").encode(encoding="utf-8")
+                ).decode("utf-8")
             )
         else:
-            base64_img_bytes = res.get("content").encode("utf-8")
+            base64_img_bytes = res.get("content", "").encode(encoding="utf-8")
             path.write_bytes(base64.decodebytes(base64_img_bytes))
 
 
@@ -576,9 +600,7 @@ def _align_axes_on_values(
         aligns = [ticks[ii][0] for ii in range(n_ax)]
     else:
         if len(align_values) != n_ax:
-            raise ValueError(
-                "Length of <axes> doesn't equal that " "of <align_values>."
-            )
+            raise ValueError("Length of <axes> doesn't equal that of <align_values>.")
         aligns = align_values
 
     # Get upper and lower bounds of each axis
@@ -622,18 +644,28 @@ def _get_min_abs_lims(
 
 
 def _make_axes_symmetric_zero_centered(
-    axes: List[Axes], is_yaxis: bool, min_abs_lims: Optional[List[float]] = None
+    axes: Union[_AxesBase, List[_AxesBase]],
+    is_yaxis: bool,
+    min_abs_lims: Optional[Union[float, List[float]]] = None,
 ) -> None:
-    _min_abs_lims = _get_min_abs_lims(axes, min_abs_lims)
+    _axes = object_or_object_sequence_to_list(axes)
+    _min_abs_lims = _get_min_abs_lims(
+        _axes,
+        (
+            object_or_object_sequence_to_list(min_abs_lims)
+            if min_abs_lims is not None
+            else None
+        ),
+    )
 
-    def get_lim(ax: Axes) -> Tuple[float, float]:
+    def get_lim(ax: _AxesBase) -> Tuple[float, float]:
         if is_yaxis:
             return ax.get_ylim()
         return ax.get_xlim()
 
     max_lims: NDArrayFloat = np.nanmax(
         [
-            np.max(np.abs(np.array([get_lim(ax) for ax in axes])), axis=1),
+            np.max(np.abs(np.array([get_lim(ax) for ax in _axes])), axis=1),
             _min_abs_lims,
         ],
         axis=0,
@@ -645,12 +677,13 @@ def _make_axes_symmetric_zero_centered(
         else:
             ax.set_xlim(-lim, lim)
 
-    for i, ax in enumerate(axes):
+    for i, ax in enumerate(_axes):
         set_symlim(ax, max_lims[i])
 
 
 def make_x_axes_symmetric_zero_centered(
-    axes: List[Axes], min_xlims: Optional[List[float]] = None
+    axes: Union[_AxesBase, List[_AxesBase]],
+    min_xlims: Optional[Union[float, List[float]]] = None,
 ) -> None:
     """
     Make x-axis symmetric in zero for all provided axes
@@ -659,9 +692,9 @@ def make_x_axes_symmetric_zero_centered(
 
     Parameters
     ----------
-    axes : List[Axes]
-        List of axes to adjust.
-    min_xlims: Optional[List[float]]
+    axes : Union[_AxesBase, List[_AxesBase]]
+        Axis or list of axes to adjust.
+    min_xlims: Optional[Union[float, List[float]]]
 
         .. versionadded:: 1.2
 
@@ -680,7 +713,8 @@ def make_x_axes_symmetric_zero_centered(
 
 
 def make_y_axes_symmetric_zero_centered(
-    axes: List[Axes], min_ylims: Optional[List[float]] = None
+    axes: Union[_AxesBase, List[_AxesBase]],
+    min_ylims: Optional[Union[float, List[float]]] = None,
 ) -> None:
     """
     Make y-axis symmetric in zero for all provided axes.
@@ -689,9 +723,9 @@ def make_y_axes_symmetric_zero_centered(
 
     Parameters
     ----------
-    axes : List[Axes]
-        List of axes to adjust.
-    min_ylims: Optional[List[float]]
+    axes : Union[Axes, List[Axes]]
+        Axis or list of axes to adjust.
+    min_ylims: Optional[Union[float, List[float]]]
 
         .. versionadded:: 1.2
 
@@ -840,9 +874,9 @@ def add_twin_axis_as_datetime(
         ax2.set_xbound(*ax.get_xbound())
 
     if is_y_axis:
-        ax2.yaxis.set_ticks_position(position)
+        ax2.yaxis.set_ticks_position(position)  # ty: ignore[invalid-argument-type]
     else:
-        ax2.xaxis.set_ticks_position(position)
+        ax2.xaxis.set_ticks_position(position)  # ty: ignore[invalid-argument-type]
 
     # Apply a shift
     ax2.spines[position].set_position(("outward", spine_outward_position))
@@ -906,7 +940,7 @@ def add_xaxis_twin_as_date(
     )
 
 
-def add_letter_to_frames(axes: Sequence[Axes]) -> None:
+def add_letter_to_frames(axes: Sequence[Axes], zorder: int = 10) -> None:
     """
     Add a letter at the top left hand corner of the frame of the given axes.
 
@@ -917,6 +951,8 @@ def add_letter_to_frames(axes: Sequence[Axes]) -> None:
     ----------
     axes : Sequence[Axes]
         Sequence of axes to label.
+    zorder: int
+        Drawing order for axes is patches, lines, text. The default is 10.
     """
     # dict of letters
     d = dict(enumerate(string.ascii_lowercase, 1))
@@ -929,7 +965,7 @@ def add_letter_to_frames(axes: Sequence[Axes]) -> None:
     else:  # need to add numbers to letters
 
         def _get_letter(_i: int) -> str:
-            return f"{d[_i%26 + 1]}-{_i//26+1}"
+            return f"{d[_i % 26 + 1]}-{_i // 26 + 1}"
 
     for i, ax in enumerate(axes):
         ax.text(
@@ -942,4 +978,6 @@ def add_letter_to_frames(axes: Sequence[Axes]) -> None:
             ha="left",
             fontweight="bold",
             bbox=dict(facecolor="white", edgecolor="k", pad=5.0),
+            zorder=zorder,
+            family="monospace",
         )
