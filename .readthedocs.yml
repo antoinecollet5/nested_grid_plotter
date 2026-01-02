@@ -17,7 +17,7 @@ build:
 # Optionally set the version of Python and requirements required to build your docs
 python:
   install:
-    - requirements: requirements_dev.txt
+    # Install your package in editable mode with optional dev extras
     - method: pip
       path: "."
       extra_requirements:
