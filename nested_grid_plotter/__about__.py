@@ -2,6 +2,6 @@
 # Copyright (c) 2026 Antoine COLLET
 """Get the metadata."""
 
-__version__: str = "2.1.0"
+__version__: str = "2.1.1"
 __author__: str = "Antoine Collet"
 __name__: str = "nested_grid_plotter"

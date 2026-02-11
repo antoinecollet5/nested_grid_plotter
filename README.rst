@@ -49,7 +49,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
     plotter.identify_axes()  # Helper to add the name of the axis on the plot
     plotter.fig
 
-.. figure:: _static/nested_grid.png
+.. figure:: https://raw.githubusercontent.com/antoinecollet5/nested_grid_plotter/master/_static/nested_grid.png
    :alt: nested_grid
    :width: 100%
    :align: center
@@ -58,7 +58,7 @@ NestedGridPlotter is based on `matplotlib <https://matplotlib.org/>`_ and intend
 
 It provide multiple utilities such as grid alignment:
 
-.. figure:: _static/alignment.png
+.. figure:: https://raw.githubusercontent.com/antoinecollet5/nested_grid_plotter/master/_static/alignment.png
    :alt: alignment
    :width: 100%
    :align: center
@@ -67,7 +67,7 @@ It provide multiple utilities such as grid alignment:
 
 As well as wrapper for complex plots and animations.
 
-.. figure:: _static/animation_example.gif
+.. figure:: https://raw.githubusercontent.com/antoinecollet5/nested_grid_plotter/master/_static/animation_example.gif
    :alt: animation_example
    :width: 100%
    :align: center
@@ -77,7 +77,7 @@ As well as wrapper for complex plots and animations.
 
 It also allows to make legend positioning and gathering flexible and simpler with some automatic placement solvers:
 
-.. figure:: _static/complex_legend.png
+.. figure:: https://raw.githubusercontent.com/antoinecollet5/nested_grid_plotter/master/_static/complex_legend.png
    :alt: complex_legend
    :width: 100%
    :align: center
