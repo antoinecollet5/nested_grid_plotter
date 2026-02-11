@@ -19,7 +19,7 @@ import pytest
 from matplotlib import colors
 from matplotlib.axes import Axes  # Just for liting
 from matplotlib.figure import Figure
-from nested_grid_plotter.imshow import (
+from nested_grid_plotter._imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,
@@ -112,8 +112,8 @@ def test_normalize_data_and_cbar(
     _norm_data_and_cbar(
         [im1, im2], [data1, data2], imshow_kwargs, is_symmetric_cbar=is_symmetric
     )
-    assert im1.norm.vmax == im2.norm.vmax  # ty: ignore[unsupported-operator]
-    assert im1.norm.vmin == im2.norm.vmin  # ty: ignore[unsupported-operator]
+    assert im1.norm.vmax == im2.norm.vmax
+    assert im1.norm.vmin == im2.norm.vmin
     assert im1.norm.vmax > 1.0  # ty: ignore[unsupported-operator]
     assert 0.5 > im2.norm.vmin  # ty: ignore[unsupported-operator]
 

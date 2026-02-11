@@ -54,20 +54,34 @@ Plot functions
 
     multi_imshow
 
+Plot configuration
+==================
+
+.. autosummary::
+   :toctree: _autosummary
+
+    apply_nice_default_rc_params
+
 """
+
+from pathlib import Path
 
 from matplotlib.figure import Figure
 
 from nested_grid_plotter.__about__ import __author__, __name__, __version__
-from nested_grid_plotter.animated_plotter import AnimatedPlotter
-from nested_grid_plotter.base_plotter import (
+from nested_grid_plotter._animated_plotter import AnimatedPlotter
+from nested_grid_plotter._base_plotter import (
     NestedGridPlotter,
     Plotter,
     SubfigsBuilder,
     SubplotsMosaicBuilder,
 )
-from nested_grid_plotter.imshow import multi_imshow
-from nested_grid_plotter.utils import (
+from nested_grid_plotter._config import (
+    _register_default_fonts,
+    apply_nice_default_rc_params,
+)
+from nested_grid_plotter._imshow import multi_imshow
+from nested_grid_plotter._utils import (
     add_grid_and_tick_prams_to_axis,
     add_letter_to_frames,
     add_twin_axis_as_datetime,
@@ -87,6 +101,8 @@ from nested_grid_plotter.utils import (
     replace_bad_path_characters,
     ticklabels_to_datetime,
 )
+
+_register_default_fonts(Path(__file__).parent.joinpath("fonts"))
 
 __all__ = [
     "__version__",
@@ -117,4 +133,5 @@ __all__ = [
     "add_xaxis_twin_as_date",
     "multi_imshow",
     "add_letter_to_frames",
+    "apply_nice_default_rc_params",
 ]

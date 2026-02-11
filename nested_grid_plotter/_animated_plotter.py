@@ -17,8 +17,8 @@ from matplotlib.image import AxesImage
 from matplotlib.lines import Line2D
 from matplotlib.text import Text
 
-from nested_grid_plotter.base_plotter import NestedBuilder, NestedGridPlotter
-from nested_grid_plotter.imshow import (
+from nested_grid_plotter._base_plotter import NestedBuilder, NestedGridPlotter
+from nested_grid_plotter._imshow import (
     _apply_default_colorbar_kwargs,
     _apply_default_imshow_kwargs,
     _check_axes_and_data_consistency,

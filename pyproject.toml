@@ -48,6 +48,10 @@ Changelog = "https://github.com/antoinecollet5/nested_grid_plotter/blob/master/C
 [tool.setuptools]
 py-modules = []
 packages = ["nested_grid_plotter"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+nested_grid_plotter = ["fonts/*", "*.rst"]
 
 [tool.setuptools.dynamic]
 version = { attr = "nested_grid_plotter.__about__.__version__" }
@@ -86,7 +90,7 @@ lint.select = [
     # isort
     "I",
 ]
-src = ["src", "tests", "docs"]
+src = ["nested_grid_plotter", "tests", "docs"]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
 lint.fixable = ["A", "B", "C", "D", "E", "F", "I"]

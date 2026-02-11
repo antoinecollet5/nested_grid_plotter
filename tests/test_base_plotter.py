@@ -21,7 +21,7 @@ import pytest
 from matplotlib.axes import Axes
 from matplotlib.figure import SubFigure
 from matplotlib.lines import Line2D
-from nested_grid_plotter.base_plotter import (
+from nested_grid_plotter._base_plotter import (
     _make_kwargs_retrocompatible,
     is_lgd_overlapping_axis,
 )
@@ -640,9 +640,9 @@ def test_axis_and_fig_add_legend(is_outside_frame: bool):
     for ax_name, ax in plotter.ax_dict.items():
         # Handles
         if Version(mpl.__version__) >= Version("3.7"):
-            assert len(ax.legend_.legend_handles) == 3  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+            assert len(ax.legend_.legend_handles) == 3  # ty: ignore[possibly-missing-attribute]
         else:
-            assert len(ax.legend_.legendHandles) == 3  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+            assert len(ax.legend_.legendHandles) == 3  # ty: ignore[unresolved-attribute]
         # Labels
         assert [t._text for t in ax.legend_.texts] == [  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
             f"linear {ax_name}",
@@ -654,14 +654,14 @@ def test_axis_and_fig_add_legend(is_outside_frame: bool):
     plotter.add_fig_legend(fontsize=10, ncol=2)
     assert len(plotter.fig.legends) == 1
     all_labels = [t._text for ax in plotter.axes for t in ax.legend_.texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
-    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(all_labels)  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(all_labels)  # ty: ignore[unresolved-attribute]
 
 
 def test_add_fig_legend_with_duplicated_labels_among_axes():
     # Test fig legend with common labels
     plotter = generate_legend_test_figure_common_items()
     plotter.add_fig_legend(fontsize=10)
-    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+    assert sorted([t._text for t in plotter.fig.legends[0].texts]) == sorted(  # ty: ignore[unresolved-attribute]
         [
             "the common linear legend item",
             "the common quadratic legend item",
@@ -698,7 +698,7 @@ def test_add_additional_legend_item():
     plotter.add_fig_legend(fontsize=10, ncol=2)
 
     ax_labels = [t._text for t in plotter.ax_dict["lt1"].legend_.texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
-    fig_labels = [t._text for t in plotter.fig.legends[0].texts]  # ty: ignore[unresolved-attribute, possibly-missing-attribute]
+    fig_labels = [t._text for t in plotter.fig.legends[0].texts]  # ty: ignore[unresolved-attribute]
 
     assert ax_labels[-1] == "My extra legend item"
     assert fig_labels[-1] == "My extra legend item"

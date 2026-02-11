@@ -22,7 +22,7 @@ from matplotlib import colors
 from matplotlib.animation import HTMLWriter
 from matplotlib.figure import Figure
 from matplotlib.text import Text
-from nested_grid_plotter.animated_plotter import _get_nb_frames
+from nested_grid_plotter._animated_plotter import _get_nb_frames
 
 # turns all warnings into errors for this module
 # pytestmark = pytest.mark.filterwarnings("error")

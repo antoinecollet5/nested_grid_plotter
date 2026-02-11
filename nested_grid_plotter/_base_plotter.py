@@ -29,7 +29,7 @@ from numpy.typing import ArrayLike
 from packaging.version import Version
 from typing_extensions import Literal
 
-from nested_grid_plotter.utils import (
+from nested_grid_plotter._utils import (
     add_grid_and_tick_prams_to_axis,
     object_or_object_sequence_to_list,
 )
@@ -310,7 +310,7 @@ class SubfigsBuilder(NestedBuilder):
                 fig.subfigures(
                     nrows=self.nrows,
                     ncols=self.ncols,
-                    squeeze=self.squeeze,  # type: ignore
+                    squeeze=self.squeeze,
                     wspace=self.wspace,
                     hspace=self.hspace,
                     width_ratios=self.width_ratios,
@@ -489,7 +489,7 @@ class Plotter:
             if fig._suptitle is not None:  # type: ignore
                 bbox_extra_artists.append(fig._suptitle)  # type: ignore
 
-        return bbox_extra_artists
+        return bbox_extra_artists  # ty: ignore[invalid-return-type]
 
     def savefig(self, *args: Any, **kwargs: Any) -> None:
         """
