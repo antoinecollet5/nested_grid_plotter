@@ -33,6 +33,13 @@ def _register_default_fonts(path_to_font_files: Path) -> None:
 
 
 def apply_nice_default_rc_params() -> None:
+    """
+    Apply nice rc parameters for matplotlib.
+
+    It relies on the open TeXGyreHeros font which is provided with the package.
+
+    .. versionadded:: 2.1.0
+    """
     plt.plot()
     plt.close()  # required for the plot to update
     plt.rcParams.update(

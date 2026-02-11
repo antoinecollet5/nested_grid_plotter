@@ -2,6 +2,11 @@
 Changelog
 ==============
 
+2.1.0 (2026-02-11)
+------------------
+
+* ENH: provide `apply_nice_default_rc_params` to apply nicer fonts.
+
 2.0.0 (2026-01-02)
 ------------------
 
